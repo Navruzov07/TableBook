@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  name          String
+  email         String    @unique
+  passwordHash  String    @map("password_hash")
+  phone         String?
+  role          String    @default("customer") // "customer" | "admin"
+  restaurantId  Int?      @map("restaurant_id")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  restaurant    Restaurant? @relation(fields: [restaurantId], references: [id])
+  bookings      Booking[]
+
+  @@map("users")
+}
+
+model Restaurant {
+  id                     Int       @id @default(autoincrement())
+  name                   String
+  address                String
+  lat                    Float
+  lng                    Float
+  rating                 Float     @default(0)
+  cuisineType            String    @map("cuisine_type")
+  floorPlan              String    @default("{}") @map("floor_plan") // JSON string
+  openingHours           String    @map("opening_hours")
+  phone                  String?
+  description            String?
+  imageUrl               String?   @map("image_url")
+  defaultBookingDuration Int       @default(90) @map("default_booking_duration") // minutes
+  createdAt              DateTime  @default(now()) @map("created_at")
+
+  tables     RestaurantTable[]
+  menuItems  MenuItem[]
+  bookings   Booking[]
+  admins     User[]
+
+  @@map("restaurants")
+}
+
+model RestaurantTable {
+  id            Int       @id @default(autoincrement())
+  restaurantId  Int       @map("restaurant_id")
+  tableRef      String    @map("table_ref") // matches JSON id e.g. "T1"
+  label         String
+  seatCount     Int       @map("seat_count")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  bookings      Booking[]
+
+  @@unique([restaurantId, tableRef])
+  @@map("tables")
+}
+
+model MenuItem {
+  id            Int       @id @default(autoincrement())
+  restaurantId  Int       @map("restaurant_id")
+  name          String
+  description   String?
+  price         Float
+  category      String    // "Starters", "Mains", "Desserts", "Drinks"
+  imageUrl      String?   @map("image_url")
+  available     Boolean   @default(true)
+  sortOrder     Int       @default(0) @map("sort_order")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  restaurant    Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  preorderItems PreorderItem[]
+
+  @@map("menu_items")
+}
+
+model Booking {
+  id            Int       @id @default(autoincrement())
+  userId        Int       @map("user_id")
+  tableId       Int       @map("table_id")
+  restaurantId  Int       @map("restaurant_id")
+  bookingDate   String    @map("booking_date") // "YYYY-MM-DD"
+  startTime     String    @map("start_time")   // "HH:MM"
+  endTime       String    @map("end_time")     // "HH:MM"
+  guestCount    Int       @map("guest_count")
+  status        String    @default("confirmed") // pending | confirmed | cancelled | completed
+  notes         String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  user          User            @relation(fields: [userId], references: [id])
+  table         RestaurantTable @relation(fields: [tableId], references: [id])
+  restaurant    Restaurant      @relation(fields: [restaurantId], references: [id])
+  preorderItems PreorderItem[]
+
+  @@map("bookings")
+}
+
+model PreorderItem {
+  id          Int     @id @default(autoincrement())
+  bookingId   Int     @map("booking_id")
+  menuItemId  Int     @map("menu_item_id")
+  quantity    Int
+  unitPrice   Float   @map("unit_price") // snapshot at order time
+  notes       String?
+
+  booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  menuItem    MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@map("preorder_items")
+}
