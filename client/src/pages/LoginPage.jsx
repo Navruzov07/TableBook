@@ -106,13 +106,6 @@ export default function LoginPage() {
                   />
                 </div>
               </div>
-              <div className="input-group">
-                <label>Account Type</label>
-                <select className="input" value={form.role} onChange={update('role')}>
-                  <option value="customer">Customer</option>
-                  <option value="admin">Restaurant Admin</option>
-                </select>
-              </div>
             </>
           )}
 
@@ -131,12 +124,6 @@ export default function LoginPage() {
             {isRegister ? 'Sign In' : 'Register'}
           </button>
         </p>
-
-        <div style={{ marginTop: 20, padding: 12, background: 'var(--bg-glass)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
-          <p className="text-xs text-muted" style={{ marginBottom: 6 }}>Demo Credentials</p>
-          <p className="text-xs">Admin: admin@bellaitalia.com / admin123</p>
-          <p className="text-xs">Customer: john@example.com / user123</p>
-        </div>
       </div>
     </div>
   );
