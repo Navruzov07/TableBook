@@ -5,6 +5,7 @@ import authRoutes from './routes/auth.js';
 import restaurantRoutes from './routes/restaurants.js';
 import bookingRoutes from './routes/bookings.js';
 import adminRoutes from './routes/admin.js';
+import ceoRoutes from './routes/ceo.js';
 
 const app = express();
 const prisma = new PrismaClient();
@@ -28,6 +29,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/restaurants', restaurantRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/ceo', ceoRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -1,13 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { restaurantAPI } from '../api/index.js';
+import { useLang } from '../context/LangContext.jsx';
 import FloorPlanViewer from '../components/FloorPlan/FloorPlanViewer.jsx';
 import BookingForm from '../components/Booking/BookingForm.jsx';
 import MenuList from '../components/Menu/MenuList.jsx';
-import { Star, MapPin, Clock, Phone, UtensilsCrossed, Info } from 'lucide-react';
+import { Star, MapPin, Clock, Phone } from 'lucide-react';
 
 export default function RestaurantPage() {
   const { id } = useParams();
+  const { t } = useLang();
   const [restaurant, setRestaurant] = useState(null);
   const [menu, setMenu] = useState(null);
   const [availability, setAvailability] = useState(null);
@@ -39,13 +41,8 @@ export default function RestaurantPage() {
   }, [checkAvailability]);
 
   const handleTableSelect = (table) => {
-    // Find db table id from restaurant.tables
     const dbTable = restaurant.tables?.find(t => t.tableRef === table.id);
-    setSelectedTable({
-      ...table,
-      dbId: dbTable?.id,
-      seatCount: dbTable?.seatCount || table.seats
-    });
+    setSelectedTable({ ...table, dbId: dbTable?.id, seatCount: dbTable?.seatCount || table.seats });
   };
 
   const handleBookingSuccess = () => {
@@ -54,15 +51,14 @@ export default function RestaurantPage() {
   };
 
   if (loading) return <div className="loading-page"><div className="spinner" /></div>;
-  if (!restaurant) return <div className="container mt-3"><p className="text-muted">Restaurant not found</p></div>;
+  if (!restaurant) return <div className="container mt-3"><p className="text-muted">{t('restaurant.notFound')}</p></div>;
 
-  const floorPlan = typeof restaurant.floorPlan === 'string'
-    ? JSON.parse(restaurant.floorPlan)
-    : restaurant.floorPlan;
-
-  // Calculate scale to fit container
+  const floorPlan = typeof restaurant.floorPlan === 'string' ? JSON.parse(restaurant.floorPlan) : restaurant.floorPlan;
   const containerWidth = 780;
   const scale = Math.min(1, containerWidth / (floorPlan.width || 800));
+
+  const availCount = availability ? availability.filter(a => a.available).length : 0;
+  const totalCount = availability ? availability.length : 0;
 
   return (
     <div className="container" style={{ paddingTop: 16, paddingBottom: 40 }}>
@@ -70,17 +66,9 @@ export default function RestaurantPage() {
       <div className="animate-fade-in" style={{ marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 20 }}>
           {restaurant.imageUrl ? (
-            <img
-              src={restaurant.imageUrl}
-              alt={restaurant.name}
-              style={{ width: 100, height: 100, borderRadius: 'var(--radius-lg)', objectFit: 'cover' }}
-            />
+            <img src={restaurant.imageUrl} alt={restaurant.name} style={{ width: 100, height: 100, borderRadius: 'var(--radius-lg)', objectFit: 'cover' }} />
           ) : (
-            <div style={{
-              width: 100, height: 100, borderRadius: 'var(--radius-lg)',
-              background: 'linear-gradient(135deg, var(--accent), #e17055)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36
-            }}>🍽</div>
+            <div style={{ width: 100, height: 100, borderRadius: 'var(--radius-lg)', background: 'linear-gradient(135deg, var(--accent), #059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36 }}>🍽</div>
           )}
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
@@ -91,21 +79,11 @@ export default function RestaurantPage() {
               </div>
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <MapPin size={14} /> {restaurant.address}
-              </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Clock size={14} /> {restaurant.openingHours}
-              </span>
-              {restaurant.phone && (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Phone size={14} /> {restaurant.phone}
-                </span>
-              )}
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={14} /> {restaurant.address}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={14} /> {restaurant.openingHours}</span>
+              {restaurant.phone && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Phone size={14} /> {restaurant.phone}</span>}
             </div>
-            {restaurant.description && (
-              <p className="text-sm text-muted" style={{ marginTop: 8, maxWidth: 600 }}>{restaurant.description}</p>
-            )}
+            {restaurant.description && <p className="text-sm text-muted" style={{ marginTop: 8, maxWidth: 600 }}>{restaurant.description}</p>}
             <span className="badge badge-accent mt-1">{restaurant.cuisineType}</span>
           </div>
         </div>
@@ -114,34 +92,27 @@ export default function RestaurantPage() {
       {/* Tabs */}
       <div className="tabs" style={{ marginBottom: 20, display: 'inline-flex' }}>
         <button className={`tab ${activeTab === 'book' ? 'active' : ''}`} onClick={() => setActiveTab('book')}>
-          🪑 Book a Table
+          🪑 {t('restaurant.bookTab')}
         </button>
         <button className={`tab ${activeTab === 'menu' ? 'active' : ''}`} onClick={() => setActiveTab('menu')}>
-          📋 Menu
+          📋 {t('restaurant.menuTab')}
         </button>
         <button className={`tab ${activeTab === 'info' ? 'active' : ''}`} onClick={() => setActiveTab('info')}>
-          ℹ️ Info
+          ℹ️ {t('restaurant.infoTab')}
         </button>
       </div>
 
-      {/* Tab Content */}
+      {/* Book Tab */}
       {activeTab === 'book' && (
         <div className="animate-fade-in" style={{ display: 'grid', gridTemplateColumns: selectedTable ? '1fr 380px' : '1fr', gap: 20 }}>
           <div>
-            {/* Date/Time Controls */}
             <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
               <div className="input-group">
-                <label>Date</label>
-                <input
-                  type="date"
-                  className="input"
-                  value={checkDate}
-                  onChange={e => setCheckDate(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
-                />
+                <label>{t('restaurant.date')}</label>
+                <input type="date" className="input" value={checkDate} onChange={e => setCheckDate(e.target.value)} min={new Date().toISOString().split('T')[0]} />
               </div>
               <div className="input-group">
-                <label>Time</label>
+                <label>{t('restaurant.time')}</label>
                 <select className="input" value={checkTime} onChange={e => setCheckTime(e.target.value)}>
                   {Array.from({ length: 28 }, (_, i) => {
                     const h = Math.floor(i / 2) + 10;
@@ -153,12 +124,11 @@ export default function RestaurantPage() {
               </div>
               <p className="text-xs text-muted" style={{ paddingBottom: 10 }}>
                 {availability
-                  ? `${availability.filter(a => a.available).length} of ${availability.length} tables available`
-                  : 'Checking availability...'}
+                  ? `${availCount} ${t('restaurant.of')} ${totalCount} ${t('restaurant.tablesAvail')}`
+                  : t('restaurant.checkAvail')}
               </p>
             </div>
 
-            {/* Floor Plan */}
             <FloorPlanViewer
               floorPlan={floorPlan}
               availability={availability}
@@ -169,12 +139,11 @@ export default function RestaurantPage() {
 
             {!selectedTable && (
               <p className="text-muted text-sm mt-2" style={{ textAlign: 'center' }}>
-                👆 Click a green table to start your reservation
+                {t('restaurant.clickHint')}
               </p>
             )}
           </div>
 
-          {/* Booking Form (appears when table selected) */}
           {selectedTable && (
             <div className="animate-slide-up">
               <BookingForm
@@ -198,32 +167,19 @@ export default function RestaurantPage() {
       {activeTab === 'info' && (
         <div className="animate-fade-in" style={{ maxWidth: 600 }}>
           <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div>
-              <p className="text-xs text-muted" style={{ fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>Address</p>
-              <p>{restaurant.address}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted" style={{ fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>Opening Hours</p>
-              <p>{restaurant.openingHours}</p>
-            </div>
-            {restaurant.phone && (
-              <div>
-                <p className="text-xs text-muted" style={{ fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>Phone</p>
-                <p>{restaurant.phone}</p>
+            {[
+              [t('restaurant.address'), restaurant.address],
+              [t('restaurant.openingHours'), restaurant.openingHours],
+              restaurant.phone ? [t('restaurant.phone'), restaurant.phone] : null,
+              [t('restaurant.cuisine'), restaurant.cuisineType],
+              [t('restaurant.bookingDuration'), `${restaurant.defaultBookingDuration} ${t('restaurant.minutesPer')}`],
+              [t('restaurant.tables'), `${restaurant.tables?.length} ${t('restaurant.tablesCount')}`],
+            ].filter(Boolean).map(([label, value]) => (
+              <div key={label}>
+                <p className="text-xs text-muted" style={{ fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>{label}</p>
+                <p>{value}</p>
               </div>
-            )}
-            <div>
-              <p className="text-xs text-muted" style={{ fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>Cuisine</p>
-              <p>{restaurant.cuisineType}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted" style={{ fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>Booking Duration</p>
-              <p>{restaurant.defaultBookingDuration} minutes per reservation</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted" style={{ fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>Tables</p>
-              <p>{restaurant.tables?.length} tables available</p>
-            </div>
+            ))}
           </div>
         </div>
       )}

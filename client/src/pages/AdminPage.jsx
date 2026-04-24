@@ -2,13 +2,15 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminAPI, restaurantAPI } from '../api/index.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useLang } from '../context/LangContext.jsx';
 import FloorPlanViewer from '../components/FloorPlan/FloorPlanViewer.jsx';
 import FloorPlanEditor from '../components/FloorPlan/FloorPlanEditor.jsx';
-import { Plus, Trash2, Save, Edit3, Calendar, Users, Check, X, UtensilsCrossed } from 'lucide-react';
+import { Plus, Trash2, Save, Edit3, Calendar, Users, Check, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function AdminPage() {
   const { user, isAdmin, isAuthenticated } = useAuth();
+  const { t } = useLang();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('bookings');
   const [restaurant, setRestaurant] = useState(null);
@@ -16,15 +18,11 @@ export default function AdminPage() {
   const [menu, setMenu] = useState({});
   const [loading, setLoading] = useState(true);
 
-  // Menu form state
   const [menuForm, setMenuForm] = useState({ name: '', description: '', price: '', category: 'Mains', imageUrl: '' });
   const [editingMenuItem, setEditingMenuItem] = useState(null);
 
   useEffect(() => {
-    if (!isAuthenticated || !isAdmin) {
-      navigate('/login');
-      return;
-    }
+    if (!isAuthenticated || !isAdmin) { navigate('/login'); return; }
     loadData();
   }, [isAuthenticated, isAdmin]);
 
@@ -46,73 +44,63 @@ export default function AdminPage() {
     }
   };
 
-  // --- Booking Management ---
   const updateBookingStatus = async (id, status) => {
     try {
       await adminAPI.updateBookingStatus(id, status);
       toast.success(`Booking ${status}`);
       setBookings(bookings.map(b => b.id === id ? { ...b, status } : b));
     } catch {
-      toast.error('Failed to update');
+      toast.error(t('common.error'));
     }
   };
 
-  // --- Floor Plan Management ---
   const handleSaveFloorPlan = async (newPlan) => {
     try {
       setLoading(true);
       await adminAPI.updateFloorPlan(newPlan);
-      toast.success('Floor plan saved successfully!');
+      toast.success(t('admin.saved'));
       setRestaurant({ ...restaurant, floorPlan: JSON.stringify(newPlan) });
       setLoading(false);
-    } catch (err) {
+    } catch {
       setLoading(false);
-      toast.error('Failed to save floor plan');
+      toast.error(t('admin.saveFailed'));
     }
   };
 
-  // --- Menu Management ---
   const handleAddMenuItem = async (e) => {
     e.preventDefault();
     try {
       if (editingMenuItem) {
         await adminAPI.updateMenuItem(editingMenuItem, menuForm);
-        toast.success('Menu item updated');
+        toast.success('Updated');
       } else {
         await adminAPI.addMenuItem(menuForm);
-        toast.success('Menu item added');
+        toast.success('Added');
       }
       setMenuForm({ name: '', description: '', price: '', category: 'Mains', imageUrl: '' });
       setEditingMenuItem(null);
-      // Reload menu
       const menuData = await restaurantAPI.menu(user.restaurantId);
       setMenu(menuData.data);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed');
+      toast.error(err.response?.data?.error || t('common.error'));
     }
   };
 
   const handleEditMenuItem = (item) => {
     setEditingMenuItem(item.id);
-    setMenuForm({
-      name: item.name,
-      description: item.description || '',
-      price: item.price.toString(),
-      category: item.category,
-      imageUrl: item.imageUrl || ''
-    });
+    setMenuForm({ name: item.name, description: item.description || '', price: item.price.toString(), category: item.category, imageUrl: item.imageUrl || '' });
     setActiveTab('menu');
   };
 
   const handleDeleteMenuItem = async (id) => {
-    if (!confirm('Delete this menu item?')) return;
+    if (!confirm(t('admin.deleteConfirm'))) return;
     try {
       await adminAPI.deleteMenuItem(id);
       toast.success('Deleted');
       const menuData = await restaurantAPI.menu(user.restaurantId);
       setMenu(menuData.data);
     } catch {
-      toast.error('Failed to delete');
+      toast.error(t('common.error'));
     }
   };
 
@@ -126,8 +114,8 @@ export default function AdminPage() {
   if (!restaurant) {
     return (
       <div className="container mt-3 text-center">
-        <h2>No Restaurant Linked</h2>
-        <p className="text-muted mt-1">Your admin account is not linked to a restaurant yet.</p>
+        <h2>{t('admin.noRestaurant')}</h2>
+        <p className="text-muted mt-1">{t('admin.noRestaurantHint')}</p>
       </div>
     );
   }
@@ -135,20 +123,19 @@ export default function AdminPage() {
   return (
     <div className="container" style={{ paddingTop: 16, paddingBottom: 40 }}>
       <div style={{ marginBottom: 20 }}>
-        <h1 style={{ fontSize: '1.5rem' }}>Admin Panel</h1>
+        <h1 style={{ fontSize: '1.5rem' }}>{t('admin.title')}</h1>
         <p className="text-muted text-sm">{restaurant.name}</p>
       </div>
 
-      {/* Tabs */}
       <div className="tabs" style={{ marginBottom: 20, display: 'inline-flex' }}>
         <button className={`tab ${activeTab === 'bookings' ? 'active' : ''}`} onClick={() => setActiveTab('bookings')}>
-          📅 Bookings ({bookings.length})
+          📅 {t('admin.bookings')} ({bookings.length})
         </button>
         <button className={`tab ${activeTab === 'menu' ? 'active' : ''}`} onClick={() => setActiveTab('menu')}>
-          🍽 Menu
+          🍽 {t('admin.menu')}
         </button>
         <button className={`tab ${activeTab === 'floorplan' ? 'active' : ''}`} onClick={() => setActiveTab('floorplan')}>
-          🪑 Floor Plan
+          🪑 {t('admin.floorPlan')}
         </button>
       </div>
 
@@ -158,7 +145,7 @@ export default function AdminPage() {
           {bookings.length === 0 ? (
             <div className="card text-center" style={{ padding: 40 }}>
               <p style={{ fontSize: 36 }}>📋</p>
-              <p className="text-muted mt-1">No bookings yet</p>
+              <p className="text-muted mt-1">{t('admin.noBookings')}</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -179,17 +166,17 @@ export default function AdminPage() {
                   </div>
                   {b.preorderItems?.length > 0 && (
                     <p className="text-xs text-muted mb-1">
-                      🍽 Pre-order: {b.preorderItems.map(p => `${p.menuItem?.name} ×${p.quantity}`).join(', ')}
+                      🍽 {t('admin.preOrder')}: {b.preorderItems.map(p => `${p.menuItem?.name} ×${p.quantity}`).join(', ')}
                     </p>
                   )}
                   {(b.status === 'confirmed' || b.status === 'pending') && (
                     <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                      <button className="btn btn-sm" style={{ background: 'var(--success-bg)', color: 'var(--success)', border: '1px solid rgba(0,214,143,0.2)' }}
+                      <button className="btn btn-sm" style={{ background: 'var(--success-bg)', color: 'var(--success)', border: '1px solid var(--success)' }}
                         onClick={() => updateBookingStatus(b.id, 'completed')}>
-                        <Check size={13} /> Complete
+                        <Check size={13} /> {t('admin.complete')}
                       </button>
                       <button className="btn btn-danger btn-sm" onClick={() => updateBookingStatus(b.id, 'cancelled')}>
-                        <X size={13} /> Cancel
+                        <X size={13} /> {t('admin.cancel')}
                       </button>
                     </div>
                   )}
@@ -203,26 +190,24 @@ export default function AdminPage() {
       {/* Menu Tab */}
       {activeTab === 'menu' && (
         <div className="animate-fade-in">
-          {/* Add/Edit Form */}
           <div className="card" style={{ marginBottom: 20 }}>
             <h3 style={{ marginBottom: 12, fontSize: '1rem' }}>
-              {editingMenuItem ? '✏️ Edit Menu Item' : '➕ Add Menu Item'}
+              {editingMenuItem ? `✏️ ${t('admin.editItem')}` : `➕ ${t('admin.addItem')}`}
             </h3>
             <form onSubmit={handleAddMenuItem} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div className="input-group">
-                <label>Name</label>
-                <input className="input" placeholder="Dish name" value={menuForm.name}
+                <label>{t('admin.itemName')}</label>
+                <input className="input" placeholder={t('admin.itemName')} value={menuForm.name}
                   onChange={e => setMenuForm({ ...menuForm, name: e.target.value })} required />
               </div>
               <div className="input-group">
-                <label>Price ($)</label>
+                <label>{t('admin.itemPrice')}</label>
                 <input className="input" type="number" step="0.01" placeholder="9.99" value={menuForm.price}
                   onChange={e => setMenuForm({ ...menuForm, price: e.target.value })} required />
               </div>
               <div className="input-group">
-                <label>Category</label>
-                <select className="input" value={menuForm.category}
-                  onChange={e => setMenuForm({ ...menuForm, category: e.target.value })}>
+                <label>{t('admin.itemCategory')}</label>
+                <select className="input" value={menuForm.category} onChange={e => setMenuForm({ ...menuForm, category: e.target.value })}>
                   <option>Starters</option>
                   <option>Mains</option>
                   <option>Sides</option>
@@ -231,30 +216,28 @@ export default function AdminPage() {
                 </select>
               </div>
               <div className="input-group">
-                <label>Image URL (optional)</label>
+                <label>{t('admin.itemImage')}</label>
                 <input className="input" placeholder="https://..." value={menuForm.imageUrl}
                   onChange={e => setMenuForm({ ...menuForm, imageUrl: e.target.value })} />
               </div>
               <div className="input-group" style={{ gridColumn: '1 / -1' }}>
-                <label>Description</label>
-                <input className="input" placeholder="Short description" value={menuForm.description}
+                <label>{t('admin.itemDescription')}</label>
+                <input className="input" placeholder={t('admin.itemDescription')} value={menuForm.description}
                   onChange={e => setMenuForm({ ...menuForm, description: e.target.value })} />
               </div>
               <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 8 }}>
                 <button className="btn btn-primary" type="submit">
-                  {editingMenuItem ? <><Save size={14} /> Update</> : <><Plus size={14} /> Add Item</>}
+                  {editingMenuItem ? <><Save size={14} /> {t('admin.update')}</> : <><Plus size={14} /> {t('admin.add')}</>}
                 </button>
                 {editingMenuItem && (
-                  <button className="btn btn-secondary" type="button" onClick={() => {
-                    setEditingMenuItem(null);
-                    setMenuForm({ name: '', description: '', price: '', category: 'Mains', imageUrl: '' });
-                  }}>Cancel</button>
+                  <button className="btn btn-secondary" type="button" onClick={() => { setEditingMenuItem(null); setMenuForm({ name: '', description: '', price: '', category: 'Mains', imageUrl: '' }); }}>
+                    {t('admin.cancelEdit')}
+                  </button>
                 )}
               </div>
             </form>
           </div>
 
-          {/* Menu Items List */}
           {Object.entries(menu).map(([category, items]) => (
             <div key={category} style={{ marginBottom: 20 }}>
               <h3 style={{ fontSize: '0.95rem', marginBottom: 10, color: 'var(--text-secondary)' }}>{category}</h3>
@@ -266,12 +249,8 @@ export default function AdminPage() {
                     {item.description && <p className="text-xs text-muted">{item.description}</p>}
                   </div>
                   <div style={{ display: 'flex', gap: 6 }}>
-                    <button className="btn btn-secondary btn-sm" onClick={() => handleEditMenuItem(item)}>
-                      <Edit3 size={13} />
-                    </button>
-                    <button className="btn btn-danger btn-sm" onClick={() => handleDeleteMenuItem(item.id)}>
-                      <Trash2 size={13} />
-                    </button>
+                    <button className="btn btn-secondary btn-sm" onClick={() => handleEditMenuItem(item)}><Edit3 size={13} /></button>
+                    <button className="btn btn-danger btn-sm" onClick={() => handleDeleteMenuItem(item.id)}><Trash2 size={13} /></button>
                   </div>
                 </div>
               ))}
@@ -284,9 +263,7 @@ export default function AdminPage() {
       {activeTab === 'floorplan' && (
         <div className="animate-fade-in">
           <div className="card" style={{ marginBottom: 16 }}>
-            <p className="text-sm text-muted">
-              📐 Interactive Floor Plan Editor — drag tables to reposition, or use the panel to add/edit tables. Click Save when done.
-            </p>
+            <p className="text-sm text-muted">{t('admin.floorPlanHint')}</p>
           </div>
           <FloorPlanEditor
             initialFloorPlan={typeof restaurant.floorPlan === 'string' ? JSON.parse(restaurant.floorPlan) : restaurant.floorPlan}

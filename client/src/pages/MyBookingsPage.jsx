@@ -2,20 +2,19 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { bookingAPI } from '../api/index.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useLang } from '../context/LangContext.jsx';
 import { Calendar, Clock, Users, MapPin, X, ShoppingBag, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function MyBookingsPage() {
   const { isAuthenticated } = useAuth();
+  const { t } = useLang();
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
+    if (!isAuthenticated) { navigate('/login'); return; }
     loadBookings();
   }, [isAuthenticated]);
 
@@ -27,23 +26,18 @@ export default function MyBookingsPage() {
   };
 
   const handleCancel = async (id) => {
-    if (!confirm('Cancel this booking?')) return;
+    if (!confirm(t('myBookings.cancelConfirm'))) return;
     try {
       await bookingAPI.cancel(id);
-      toast.success('Booking cancelled');
+      toast.success(t('myBookings.cancelBooking'));
       loadBookings();
     } catch {
-      toast.error('Failed to cancel');
+      toast.error(t('myBookings.cancelFail'));
     }
   };
 
   const statusBadge = (status) => {
-    const map = {
-      confirmed: 'badge-success',
-      pending: 'badge-warning',
-      cancelled: 'badge-danger',
-      completed: 'badge-accent'
-    };
+    const map = { confirmed: 'badge-success', pending: 'badge-warning', cancelled: 'badge-danger', completed: 'badge-accent' };
     return <span className={`badge ${map[status] || 'badge-accent'}`}>{status}</span>;
   };
 
@@ -51,18 +45,18 @@ export default function MyBookingsPage() {
 
   return (
     <div className="container" style={{ paddingTop: 16, maxWidth: 800 }}>
-      <h1 style={{ marginBottom: 4 }}>My Bookings</h1>
+      <h1 style={{ marginBottom: 4 }}>{t('myBookings.title')}</h1>
       <p className="text-muted text-sm" style={{ marginBottom: 24 }}>
-        {bookings.length} reservation{bookings.length !== 1 ? 's' : ''}
+        {bookings.length} {t('myBookings.count')}
       </p>
 
       {bookings.length === 0 ? (
         <div className="card text-center" style={{ padding: 48 }}>
           <p style={{ fontSize: 48, marginBottom: 12 }}>📅</p>
-          <h3>No Bookings Yet</h3>
-          <p className="text-muted text-sm mt-1">Explore restaurants and make your first reservation!</p>
+          <h3>{t('myBookings.noBookings')}</h3>
+          <p className="text-muted text-sm mt-1">{t('myBookings.noBookingsHint')}</p>
           <button className="btn btn-primary mt-2" onClick={() => navigate('/')}>
-            Explore Restaurants <ChevronRight size={14} />
+            {t('myBookings.explore')} <ChevronRight size={14} />
           </button>
         </div>
       ) : (
@@ -81,17 +75,15 @@ export default function MyBookingsPage() {
 
               <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginBottom: 12 }}>
                 <span className="text-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <Calendar size={14} color="var(--accent-light)" /> {b.bookingDate}
+                  <Calendar size={14} color="var(--accent)" /> {b.bookingDate}
                 </span>
                 <span className="text-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <Clock size={14} color="var(--accent-light)" /> {b.startTime} – {b.endTime}
+                  <Clock size={14} color="var(--accent)" /> {b.startTime} – {b.endTime}
                 </span>
                 <span className="text-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <Users size={14} color="var(--accent-light)" /> {b.guestCount} guest{b.guestCount !== 1 ? 's' : ''}
+                  <Users size={14} color="var(--accent)" /> {b.guestCount}
                 </span>
-                <span className="text-sm text-muted">
-                  🪑 {b.table?.label} ({b.table?.seatCount} seats)
-                </span>
+                <span className="text-sm text-muted">🪑 {b.table?.label} ({b.table?.seatCount})</span>
               </div>
 
               {b.notes && (
@@ -103,7 +95,7 @@ export default function MyBookingsPage() {
               {b.preorderItems?.length > 0 && (
                 <div style={{ padding: 10, background: 'var(--bg-glass)', borderRadius: 'var(--radius-sm)', marginBottom: 12, border: '1px solid var(--border)' }}>
                   <p className="text-xs text-muted" style={{ marginBottom: 6, fontWeight: 600 }}>
-                    <ShoppingBag size={11} style={{ verticalAlign: 'middle' }} /> Pre-Order
+                    <ShoppingBag size={11} style={{ verticalAlign: 'middle' }} /> {t('myBookings.preOrder')}
                   </p>
                   {b.preorderItems.map(p => (
                     <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: 3 }}>
@@ -112,14 +104,14 @@ export default function MyBookingsPage() {
                     </div>
                   ))}
                   <div style={{ borderTop: '1px solid var(--border)', paddingTop: 4, marginTop: 4, fontSize: '0.8rem', fontWeight: 600, textAlign: 'right' }}>
-                    Total: ${b.preorderItems.reduce((s, p) => s + p.unitPrice * p.quantity, 0).toFixed(2)}
+                    {t('myBookings.total')}: ${b.preorderItems.reduce((s, p) => s + p.unitPrice * p.quantity, 0).toFixed(2)}
                   </div>
                 </div>
               )}
 
               {(b.status === 'confirmed' || b.status === 'pending') && (
                 <button className="btn btn-danger btn-sm" onClick={() => handleCancel(b.id)}>
-                  <X size={14} /> Cancel Booking
+                  <X size={14} /> {t('myBookings.cancelBooking')}
                 </button>
               )}
             </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useLang } from '../context/LangContext.jsx';
 import { Mail, Lock, User, Phone, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -9,6 +10,7 @@ export default function LoginPage() {
   const [form, setForm] = useState({ name: '', email: '', password: '', phone: '', role: 'customer' });
   const [loading, setLoading] = useState(false);
   const { login, register } = useAuth();
+  const { t } = useLang();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -17,14 +19,14 @@ export default function LoginPage() {
     try {
       if (isRegister) {
         await register(form);
-        toast.success('Account created!');
+        toast.success(t('login.accountCreated'));
       } else {
         await login(form.email, form.password);
-        toast.success('Welcome back!');
+        toast.success(t('login.welcomeBack'));
       }
       navigate('/');
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Something went wrong');
+      toast.error(err.response?.data?.error || t('login.error'));
     } finally {
       setLoading(false);
     }
@@ -35,21 +37,21 @@ export default function LoginPage() {
   return (
     <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
       <div className="card animate-slide-up" style={{ width: '100%', maxWidth: 440 }}>
-        <h2 style={{ marginBottom: 8 }}>{isRegister ? 'Create Account' : 'Welcome Back'}</h2>
+        <h2 style={{ marginBottom: 8 }}>{isRegister ? t('login.createAccount') : t('login.welcome')}</h2>
         <p className="text-muted text-sm" style={{ marginBottom: 24 }}>
-          {isRegister ? 'Join TableBook to start reserving' : 'Sign in to manage your bookings'}
+          {isRegister ? t('login.registerSub') : t('login.signInSub')}
         </p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {isRegister && (
             <div className="input-group">
-              <label>Name</label>
+              <label>{t('login.name')}</label>
               <div style={{ position: 'relative' }}>
                 <User size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input
                   className="input w-full"
                   style={{ paddingLeft: 36 }}
-                  placeholder="Your name"
+                  placeholder={t('login.name')}
                   value={form.name}
                   onChange={update('name')}
                   required
@@ -59,7 +61,7 @@ export default function LoginPage() {
           )}
 
           <div className="input-group">
-            <label>Email</label>
+            <label>{t('login.email')}</label>
             <div style={{ position: 'relative' }}>
               <Mail size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input
@@ -75,7 +77,7 @@ export default function LoginPage() {
           </div>
 
           <div className="input-group">
-            <label>Password</label>
+            <label>{t('login.password')}</label>
             <div style={{ position: 'relative' }}>
               <Lock size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input
@@ -92,36 +94,34 @@ export default function LoginPage() {
           </div>
 
           {isRegister && (
-            <>
-              <div className="input-group">
-                <label>Phone (optional)</label>
-                <div style={{ position: 'relative' }}>
-                  <Phone size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                  <input
-                    className="input w-full"
-                    style={{ paddingLeft: 36 }}
-                    placeholder="+1-555-0000"
-                    value={form.phone}
-                    onChange={update('phone')}
-                  />
-                </div>
+            <div className="input-group">
+              <label>{t('login.phone')}</label>
+              <div style={{ position: 'relative' }}>
+                <Phone size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <input
+                  className="input w-full"
+                  style={{ paddingLeft: 36 }}
+                  placeholder="+998 90 000 00 00"
+                  value={form.phone}
+                  onChange={update('phone')}
+                />
               </div>
-            </>
+            </div>
           )}
 
           <button className="btn btn-primary btn-lg w-full" disabled={loading} type="submit">
-            {loading ? 'Please wait...' : (isRegister ? 'Create Account' : 'Sign In')}
+            {loading ? t('login.pleaseWait') : (isRegister ? t('login.register') : t('login.signIn'))}
             {!loading && <ArrowRight size={16} />}
           </button>
         </form>
 
         <p className="text-center text-sm mt-3" style={{ color: 'var(--text-secondary)' }}>
-          {isRegister ? 'Already have an account?' : "Don't have an account?"}{' '}
+          {isRegister ? t('login.alreadyHave') : t('login.dontHave')}{' '}
           <button
             onClick={() => setIsRegister(!isRegister)}
-            style={{ background: 'none', border: 'none', color: 'var(--accent-light)', cursor: 'pointer', fontWeight: 600, fontFamily: 'inherit' }}
+            style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}
           >
-            {isRegister ? 'Sign In' : 'Register'}
+            {isRegister ? t('login.signIn') : t('login.register')}
           </button>
         </p>
       </div>

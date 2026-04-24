@@ -23,7 +23,6 @@ api.interceptors.response.use(
     if (err.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      // Don't redirect if on login page
       if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login';
       }
@@ -63,6 +62,18 @@ export const adminAPI = {
   addMenuItem: (data) => api.post('/admin/menu', data),
   updateMenuItem: (id, data) => api.put(`/admin/menu/${id}`, data),
   deleteMenuItem: (id) => api.delete(`/admin/menu/${id}`)
+};
+
+// === CEO ===
+export const ceoAPI = {
+  getRestaurants: () => api.get('/ceo/restaurants'),
+  createRestaurant: (data) => api.post('/ceo/restaurants', data),
+  updateRestaurant: (id, data) => api.put(`/ceo/restaurants/${id}`, data),
+  deleteRestaurant: (id) => api.delete(`/ceo/restaurants/${id}`),
+  getBookings: (params) => api.get('/ceo/bookings', { params }),
+  getUsers: () => api.get('/ceo/users'),
+  assignAdmin: (userId, restaurantId) => api.post('/ceo/assign-admin', { userId, restaurantId }),
+  removeAdmin: (userId) => api.post('/ceo/remove-admin', { userId })
 };
 
 export default api;

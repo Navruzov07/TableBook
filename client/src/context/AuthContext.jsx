@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { authAPI } from '../api/index.js';
 
 const AuthContext = createContext(null);
@@ -34,11 +34,12 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  const isAdmin = user?.role === 'admin';
+  const isCEO = user?.role === 'ceo';
+  const isAdmin = user?.role === 'admin' || isCEO; // CEO can do everything admin can
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isAdmin, isAuthenticated, loading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, isCEO, isAdmin, isAuthenticated, loading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -5,6 +5,10 @@ import { JWT_SECRET, authenticate } from '../middleware/auth.js';
 
 const router = Router();
 
+// CEO hardcoded credentials (MVP — no DB lookup needed)
+const CEO_EMAIL = 'tablebookceo@gmail.com';
+const CEO_PASSWORD = 'navruzov7ceo!';
+
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
@@ -55,6 +59,20 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
+    // ── CEO shortcut ──────────────────────────────────────────────────────────
+    if (email === CEO_EMAIL && password === CEO_PASSWORD) {
+      const token = jwt.sign(
+        { id: 0, email: CEO_EMAIL, role: 'ceo', restaurantId: null },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+      return res.json({
+        token,
+        user: { id: 0, name: 'CEO', email: CEO_EMAIL, role: 'ceo', restaurantId: null }
+      });
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     const user = await req.prisma.user.findUnique({ where: { email } });
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
@@ -84,6 +102,11 @@ router.post('/login', async (req, res) => {
 // GET /api/auth/me
 router.get('/me', authenticate, async (req, res) => {
   try {
+    // CEO has no DB record (id = 0)
+    if (req.user.role === 'ceo') {
+      return res.json({ id: 0, name: 'CEO', email: CEO_EMAIL, role: 'ceo', restaurantId: null });
+    }
+
     const user = await req.prisma.user.findUnique({
       where: { id: req.user.id },
       select: { id: true, name: true, email: true, phone: true, role: true, restaurantId: true }

@@ -19,10 +19,20 @@ export function authenticate(req, res, next) {
 }
 
 export function requireAdmin(req, res, next) {
-  if (req.user.role !== 'admin') {
+  if (req.user.role !== 'admin' && req.user.role !== 'ceo') {
     return res.status(403).json({ error: 'Admin access required' });
   }
   next();
 }
+
+export function requireCEO(req, res, next) {
+  if (req.user.role !== 'ceo') {
+    return res.status(403).json({ error: 'CEO access required' });
+  }
+  next();
+}
+
+// Alias for clarity
+export const requireAdminOrCEO = requireAdmin;
 
 export { JWT_SECRET };
