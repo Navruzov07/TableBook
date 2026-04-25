@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
 
 export default function BookingForm({ restaurant, table, menu, onClose, onSuccess }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const today = new Date().toISOString().split('T')[0];
 
@@ -19,6 +19,7 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
   const [preorder, setPreorder] = useState([]);
   const [showPreorder, setShowPreorder] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const update = (field) => (e) => setForm({ ...form, [field]: e.target.value });
 
@@ -52,6 +53,14 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
       navigate('/login');
       return;
     }
+    if (!user?.isPhoneVerified) {
+      toast.error('Phone verification is required to make a booking.');
+      return;
+    }
+    if (!termsAccepted) {
+      toast.error('You must agree to the Terms of Service to book.');
+      return;
+    }
     setLoading(true);
     try {
       await bookingAPI.create({
@@ -64,7 +73,8 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
         preorder: preorder.map(p => ({
           menuItemId: p.menuItemId,
           quantity: p.quantity
-        }))
+        })),
+        termsAccepted
       });
       toast.success('🎉 Booking confirmed!');
       onSuccess?.();
@@ -124,20 +134,26 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
 
         {/* Pre-order Section */}
         <div>
-          <button
-            type="button"
-            className="btn btn-secondary w-full"
-            onClick={() => setShowPreorder(!showPreorder)}
-            style={{ justifyContent: 'space-between' }}
-          >
-            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <ShoppingBag size={14} />
-              Pre-order Food {preorder.length > 0 && `(${preorder.length})`}
-            </span>
-            <span className="text-xs">{showPreorder ? 'Hide' : 'Show'} Menu</span>
-          </button>
+          {isAuthenticated && user?.trustScore < 50 ? (
+            <div style={{ padding: 12, background: 'rgba(255, 60, 60, 0.1)', color: 'var(--danger)', borderRadius: 8, fontSize: '0.85rem' }}>
+              ⚠️ Your trust score is too low ({user.trustScore}) to use pre-order functionality. Standard bookings only.
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-secondary w-full"
+              onClick={() => setShowPreorder(!showPreorder)}
+              style={{ justifyContent: 'space-between' }}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <ShoppingBag size={14} />
+                Pre-order Food {preorder.length > 0 && `(${preorder.length})`}
+              </span>
+              <span className="text-xs">{showPreorder ? 'Hide' : 'Show'} Menu</span>
+            </button>
+          )}
 
-          {showPreorder && menu && (
+          {showPreorder && menu && isAuthenticated && user?.trustScore >= 50 && (
             <div style={{ marginTop: 10, maxHeight: 250, overflowY: 'auto', padding: 4 }}>
               {Object.entries(menu).map(([category, items]) => (
                 <div key={category} style={{ marginBottom: 12 }}>
@@ -197,7 +213,34 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
           )}
         </div>
 
-        <button className="btn btn-primary btn-lg w-full" disabled={loading} type="submit">
+        {isAuthenticated && !user?.isPhoneVerified && (
+          <div style={{ padding: 12, background: 'rgba(255, 165, 0, 0.1)', color: '#cc8400', borderRadius: 8, fontSize: '0.85rem', textAlign: 'center' }}>
+            <strong>Phone Verification Required</strong><br />
+            You must verify your phone number in your profile before you can book.
+          </div>
+        )}
+
+        {/* Legal Confirmation */}
+        <div style={{ padding: 12, background: 'var(--bg-glass)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, cursor: 'pointer', fontSize: '0.85rem' }}>
+            <input 
+              type="checkbox" 
+              checked={termsAccepted} 
+              onChange={e => setTermsAccepted(e.target.checked)} 
+              style={{ marginTop: 2, accentColor: 'var(--accent)' }}
+              required 
+            />
+            <span style={{ color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+              I agree to the TableBook Terms of Service, acknowledge the Cancellation Policy, and accept full responsibility for this reservation and any associated deposit or pre-order.
+            </span>
+          </label>
+        </div>
+
+        <button 
+          className="btn btn-primary btn-lg w-full" 
+          disabled={loading || !termsAccepted || (isAuthenticated && !user?.isPhoneVerified)} 
+          type="submit"
+        >
           {loading ? 'Booking...' : 'Confirm Reservation'}
         </button>
       </form>

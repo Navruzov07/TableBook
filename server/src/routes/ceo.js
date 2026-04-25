@@ -93,6 +93,25 @@ router.put('/restaurants/:id', async (req, res) => {
   }
 });
 
+// PUT /api/ceo/restaurants/:id/deposit-rules — update deposit rules
+router.put('/restaurants/:id/deposit-rules', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { requireDeposit, depositAmount, freeCancelHours } = req.body;
+
+    const data = {};
+    if (requireDeposit !== undefined) data.requireDeposit = Boolean(requireDeposit);
+    if (depositAmount !== undefined) data.depositAmount = parseFloat(depositAmount);
+    if (freeCancelHours !== undefined) data.freeCancelHours = parseInt(freeCancelHours);
+
+    const restaurant = await req.prisma.restaurant.update({ where: { id }, data });
+    res.json(restaurant);
+  } catch (err) {
+    console.error('CEO update deposit rules error:', err);
+    res.status(500).json({ error: 'Failed to update deposit rules' });
+  }
+});
+
 // DELETE /api/ceo/restaurants/:id — delete restaurant
 router.delete('/restaurants/:id', async (req, res) => {
   try {
@@ -156,12 +175,58 @@ router.post('/remove-admin', async (req, res) => {
 router.get('/users', async (req, res) => {
   try {
     const users = await req.prisma.user.findMany({
-      select: { id: true, name: true, email: true, role: true, restaurantId: true, createdAt: true },
+      select: { id: true, name: true, email: true, phone: true, role: true, restaurantId: true, isBanned: true, trustScore: true, isPhoneVerified: true, createdAt: true },
       orderBy: { createdAt: 'desc' }
     });
     res.json(users);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
+// POST /api/ceo/users/:id/ban — toggle ban status
+router.post('/users/:id/ban', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { isBanned } = req.body;
+    
+    if (typeof isBanned !== 'boolean') {
+      return res.status(400).json({ error: 'isBanned boolean required' });
+    }
+
+    const user = await req.prisma.user.update({
+      where: { id },
+      data: { isBanned },
+      select: { id: true, name: true, email: true, isBanned: true }
+    });
+
+    res.json(user);
+  } catch (err) {
+    console.error('CEO toggle ban error:', err);
+    res.status(500).json({ error: 'Failed to update ban status' });
+  }
+});
+
+// POST /api/ceo/users/:id/trust-score — override trust score
+router.post('/users/:id/trust-score', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { trustScore } = req.body;
+
+    if (trustScore === undefined || isNaN(parseInt(trustScore))) {
+      return res.status(400).json({ error: 'Valid trustScore required' });
+    }
+
+    const user = await req.prisma.user.update({
+      where: { id },
+      data: { trustScore: parseInt(trustScore) },
+      select: { id: true, name: true, email: true, trustScore: true }
+    });
+
+    res.json(user);
+  } catch (err) {
+    console.error('CEO override trust score error:', err);
+    res.status(500).json({ error: 'Failed to override trust score' });
   }
 });
 

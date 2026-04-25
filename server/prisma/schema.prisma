@@ -15,6 +15,9 @@ model User {
   phone         String?
   role          String    @default("customer") // "customer" | "admin"
   restaurantId  Int?      @map("restaurant_id")
+  isPhoneVerified Boolean @default(false) @map("is_phone_verified")
+  trustScore    Int       @default(100)   @map("trust_score")
+  isBanned      Boolean   @default(false) @map("is_banned")
   createdAt     DateTime  @default(now()) @map("created_at")
 
   restaurant    Restaurant? @relation(fields: [restaurantId], references: [id])
@@ -37,6 +40,9 @@ model Restaurant {
   description            String?
   imageUrl               String?   @map("image_url")
   defaultBookingDuration Int       @default(90) @map("default_booking_duration") // minutes
+  requireDeposit         Boolean   @default(true) @map("require_deposit")
+  depositAmount          Float     @default(5.00) @map("deposit_amount")
+  freeCancelHours        Int       @default(24)   @map("free_cancel_hours")
   createdAt              DateTime  @default(now()) @map("created_at")
 
   tables     RestaurantTable[]
@@ -89,8 +95,12 @@ model Booking {
   startTime     String    @map("start_time")   // "HH:MM"
   endTime       String    @map("end_time")     // "HH:MM"
   guestCount    Int       @map("guest_count")
-  status        String    @default("confirmed") // pending | confirmed | cancelled | completed
+  status        String    @default("confirmed") // pending_deposit | confirmed | arrived | no_show | cancelled | completed
   notes         String?
+  depositAmount Float?    @map("deposit_amount")
+  depositStatus String?   @map("deposit_status") // "paid" | "refunded" | "forfeited"
+  termsAcceptedAt DateTime? @map("terms_accepted_at")
+  foodSentToRes Boolean   @default(false) @map("food_sent_to_res")
   createdAt     DateTime  @default(now()) @map("created_at")
 
   user          User            @relation(fields: [userId], references: [id])

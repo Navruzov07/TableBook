@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth.js';
+import { validateBookingRequest } from '../middleware/bookingValidation.js';
 import { isTableAvailable, calculateEndTime } from '../utils/availability.js';
 
 const router = Router();
 
 // POST /api/bookings — create a booking
-router.post('/', authenticate, async (req, res) => {
+router.post('/', authenticate, validateBookingRequest, async (req, res) => {
   try {
-    const { restaurantId, tableId, bookingDate, startTime, guestCount, notes, preorder } = req.body;
+    const { restaurantId, tableId, bookingDate, startTime, guestCount, notes, preorder, termsAccepted } = req.body;
 
     if (!restaurantId || !tableId || !bookingDate || !startTime || !guestCount) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -57,7 +58,8 @@ router.post('/', authenticate, async (req, res) => {
           endTime,
           guestCount,
           notes: notes || null,
-          status: 'confirmed'
+          status: 'confirmed',
+          termsAcceptedAt: termsAccepted ? new Date() : null
         }
       });
 

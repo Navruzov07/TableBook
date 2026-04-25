@@ -10,6 +10,17 @@ export function AuthProvider({ children }) {
   });
   const [loading, setLoading] = useState(false);
 
+  const refreshUser = async () => {
+    try {
+      const res = await authAPI.me();
+      localStorage.setItem('user', JSON.stringify(res.data));
+      setUser(res.data);
+      return res.data;
+    } catch (err) {
+      console.error('Failed to refresh user', err);
+    }
+  };
+
   const login = async (email, password) => {
     const res = await authAPI.login({ email, password });
     const { token, user: userData } = res.data;
@@ -39,7 +50,7 @@ export function AuthProvider({ children }) {
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isCEO, isAdmin, isAuthenticated, loading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, refreshUser, isCEO, isAdmin, isAuthenticated, loading }}>
       {children}
     </AuthContext.Provider>
   );

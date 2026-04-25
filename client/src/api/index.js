@@ -73,7 +73,10 @@ export const ceoAPI = {
   getBookings: (params) => api.get('/ceo/bookings', { params }),
   getUsers: () => api.get('/ceo/users'),
   assignAdmin: (userId, restaurantId) => api.post('/ceo/assign-admin', { userId, restaurantId }),
-  removeAdmin: (userId) => api.post('/ceo/remove-admin', { userId })
+  removeAdmin: (userId) => api.post('/ceo/remove-admin', { userId }),
+  banUser: (userId, isBanned) => api.post(`/ceo/users/${userId}/ban`, { isBanned }),
+  updateTrustScore: (userId, trustScore) => api.post(`/ceo/users/${userId}/trust-score`, { trustScore }),
+  updateDepositRules: (restaurantId, data) => api.put(`/ceo/restaurants/${restaurantId}/deposit-rules`, data)
 };
 
 export default api;

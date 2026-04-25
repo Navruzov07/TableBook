@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useLang } from '../context/LangContext.jsx';
 import {
   Plus, Trash2, Edit3, UserCheck, UserX,
-  Building2, CalendarDays, Users, X, Save, MapPin, Clock
+  Building2, CalendarDays, Users, X, Save, MapPin, Clock, Shield, AlertTriangle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -51,6 +51,11 @@ export default function CEOPage() {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [assignRestaurantId, setAssignRestaurantId] = useState(null);
   const [assignUserId, setAssignUserId] = useState('');
+
+  // Deposit Rules modal
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [editingDepositId, setEditingDepositId] = useState(null);
+  const [depositForm, setDepositForm] = useState({ requireDeposit: true, depositAmount: 5, freeCancelHours: 24 });
 
   // Auth guard
   useEffect(() => {
@@ -133,6 +138,28 @@ export default function CEOPage() {
     }
   };
 
+  const openDepositRules = (r) => {
+    setEditingDepositId(r.id);
+    setDepositForm({ 
+      requireDeposit: r.requireDeposit ?? true, 
+      depositAmount: r.depositAmount ?? 5, 
+      freeCancelHours: r.freeCancelHours ?? 24 
+    });
+    setShowDepositModal(true);
+  };
+
+  const handleSaveDepositRules = async (e) => {
+    e.preventDefault();
+    try {
+      await ceoAPI.updateDepositRules(editingDepositId, depositForm);
+      toast.success('Deposit rules updated');
+      setShowDepositModal(false);
+      loadAll();
+    } catch {
+      toast.error(t('common.error'));
+    }
+  };
+
   // ── Admin assignment ─────────────────────────────────────────────────────────
   const openAssign = (restaurantId) => {
     setAssignRestaurantId(restaurantId);
@@ -158,6 +185,32 @@ export default function CEOPage() {
     try {
       await ceoAPI.removeAdmin(userId);
       toast.success(t('ceo.adminRemoved'));
+      loadAll();
+    } catch {
+      toast.error(t('common.error'));
+    }
+  };
+
+  // ── User management ──────────────────────────────────────────────────────────
+  const handleToggleBan = async (user) => {
+    const action = user.isBanned ? 'Unban' : 'Ban';
+    if (!confirm(`Are you sure you want to ${action} ${user.name}?`)) return;
+    try {
+      await ceoAPI.banUser(user.id, !user.isBanned);
+      toast.success(`User ${action.toLowerCase()}ned successfully`);
+      loadAll();
+    } catch {
+      toast.error(t('common.error'));
+    }
+  };
+
+  const handleUpdateTrustScore = async (user, newScore) => {
+    const parsed = parseInt(newScore);
+    if (isNaN(parsed)) return;
+    if (parsed === user.trustScore) return; // no change
+    try {
+      await ceoAPI.updateTrustScore(user.id, parsed);
+      toast.success('Trust score updated');
       loadAll();
     } catch {
       toast.error(t('common.error'));
@@ -259,6 +312,7 @@ export default function CEOPage() {
                         <div style={{ display: 'flex', gap: 12, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                           <span>🪑 {r._count?.tables ?? 0} {t('ceo.tables')}</span>
                           <span>📅 {r._count?.bookings ?? 0} {t('ceo.bookings')}</span>
+                          {r.requireDeposit && <span>💳 Deposit: ${r.depositAmount}</span>}
                         </div>
                       </div>
 
@@ -291,6 +345,9 @@ export default function CEOPage() {
 
                       {/* Actions */}
                       <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                        <button className="btn btn-secondary btn-sm" onClick={() => openDepositRules(r)} title="Deposit Rules">
+                          <Shield size={13} />
+                        </button>
                         <button className="btn btn-secondary btn-sm" onClick={() => openEdit(r)}>
                           <Edit3 size={13} /> {t('common.edit')}
                         </button>
@@ -342,12 +399,23 @@ export default function CEOPage() {
         <div className="animate-fade-in">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {users.map(u => (
-              <div key={u.id} className="card" style={{ padding: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+              <div key={u.id} className="card" style={{ padding: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, opacity: u.isBanned ? 0.6 : 1 }}>
                 <div>
-                  <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>{u.name}</span>
+                  <span style={{ fontWeight: 600, fontSize: '0.95rem', textDecoration: u.isBanned ? 'line-through' : 'none' }}>{u.name}</span>
                   <span className="text-xs text-muted" style={{ marginLeft: 8 }}>{u.email}</span>
+                  {u.isBanned && <span className="badge badge-danger" style={{ marginLeft: 8 }}>BANNED</span>}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span className="text-xs text-muted">Trust Score:</span>
+                    <input 
+                      type="number" 
+                      className="input" 
+                      defaultValue={u.trustScore} 
+                      onBlur={e => handleUpdateTrustScore(u, e.target.value)} 
+                      style={{ width: 60, padding: '4px 8px', height: 28, fontSize: '0.85rem' }} 
+                    />
+                  </div>
                   {u.restaurantId && (
                     <span className="text-xs text-muted">
                       🏪 #{u.restaurantId}
@@ -364,6 +432,12 @@ export default function CEOPage() {
                       <UserX size={14} />
                     </button>
                   )}
+                  <button 
+                    className={`btn ${u.isBanned ? 'btn-secondary' : 'btn-danger'} btn-sm`} 
+                    onClick={() => handleToggleBan(u)}
+                  >
+                    <AlertTriangle size={14} /> {u.isBanned ? 'Unban' : 'Ban'}
+                  </button>
                 </div>
               </div>
             ))}
@@ -448,6 +522,53 @@ export default function CEOPage() {
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button type="button" className="btn btn-secondary" onClick={() => setShowAssignModal(false)}>{t('ceo.cancel')}</button>
               <button type="submit" className="btn btn-primary"><UserCheck size={15} /> {t('ceo.assignAdmin')}</button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* ── DEPOSIT RULES MODAL ── */}
+      {showDepositModal && (
+        <Modal title="Deposit Rules" onClose={() => setShowDepositModal(false)}>
+          <form onSubmit={handleSaveDepositRules} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div className="input-group">
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                <input 
+                  type="checkbox" 
+                  checked={depositForm.requireDeposit} 
+                  onChange={e => setDepositForm(f => ({ ...f, requireDeposit: e.target.checked }))} 
+                />
+                Require Deposit for Bookings
+              </label>
+            </div>
+            {depositForm.requireDeposit && (
+              <>
+                <div className="input-group">
+                  <label>Deposit Amount ($)</label>
+                  <input 
+                    type="number" 
+                    step="0.01" 
+                    className="input" 
+                    value={depositForm.depositAmount} 
+                    onChange={e => setDepositForm(f => ({ ...f, depositAmount: e.target.value }))} 
+                    required 
+                  />
+                </div>
+                <div className="input-group">
+                  <label>Free Cancellation Window (Hours)</label>
+                  <input 
+                    type="number" 
+                    className="input" 
+                    value={depositForm.freeCancelHours} 
+                    onChange={e => setDepositForm(f => ({ ...f, freeCancelHours: e.target.value }))} 
+                    required 
+                  />
+                </div>
+              </>
+            )}
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button type="button" className="btn btn-secondary" onClick={() => setShowDepositModal(false)}>{t('ceo.cancel')}</button>
+              <button type="submit" className="btn btn-primary"><Shield size={15} /> Save Rules</button>
             </div>
           </form>
         </Modal>

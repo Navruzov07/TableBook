@@ -42,7 +42,10 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({
       token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role }
+      user: { 
+        id: user.id, name: user.name, email: user.email, role: user.role, 
+        isPhoneVerified: user.isPhoneVerified, trustScore: user.trustScore, isBanned: user.isBanned 
+      }
     });
   } catch (err) {
     console.error('Register error:', err);
@@ -91,7 +94,10 @@ router.post('/login', async (req, res) => {
 
     res.json({
       token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role, restaurantId: user.restaurantId }
+      user: { 
+        id: user.id, name: user.name, email: user.email, role: user.role, restaurantId: user.restaurantId,
+        isPhoneVerified: user.isPhoneVerified, trustScore: user.trustScore, isBanned: user.isBanned
+      }
     });
   } catch (err) {
     console.error('Login error:', err);
@@ -109,7 +115,10 @@ router.get('/me', authenticate, async (req, res) => {
 
     const user = await req.prisma.user.findUnique({
       where: { id: req.user.id },
-      select: { id: true, name: true, email: true, phone: true, role: true, restaurantId: true }
+      select: { 
+        id: true, name: true, email: true, phone: true, role: true, restaurantId: true,
+        isPhoneVerified: true, trustScore: true, isBanned: true 
+      }
     });
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json(user);
