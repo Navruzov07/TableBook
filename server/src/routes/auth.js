@@ -11,6 +11,7 @@ const CEO_PASSWORD = 'navruzov7ceo!';
 
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
+  console.log("REGISTER HIT", req.body);
   try {
     const { name, email, password, phone, role } = req.body;
 
@@ -55,6 +56,7 @@ router.post('/register', async (req, res) => {
 
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
+  console.log("LOGIN HIT", req.body);
   try {
     const { email, password } = req.body;
 
