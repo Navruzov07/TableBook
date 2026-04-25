@@ -9,16 +9,16 @@
 export function getTranslatedField(field, lang) {
   if (!field) return '';
   
+  if (typeof field === 'object') {
+    return field[lang] || field['uz'] || Object.values(field)[0] || '';
+  }
+
   try {
-    // Attempt to parse the string as JSON
     const parsed = JSON.parse(field);
-    
-    // If it's a valid object, extract the language
     if (parsed && typeof parsed === 'object') {
       return parsed[lang] || parsed['uz'] || Object.values(parsed)[0] || '';
     }
   } catch (err) {
-    // If JSON parsing fails, it's legacy plain text, just return it
     return field;
   }
   

@@ -63,7 +63,7 @@ export default function ProfilePage() {
         style={{ marginBottom: 24, gap: 6 }}
         onClick={() => navigate(-1)}
       >
-        <ChevronLeft size={16} /> Back
+        <ChevronLeft size={16} /> {t('profile.back')}
       </button>
 
       {/* Avatar + title */}

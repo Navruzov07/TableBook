@@ -88,9 +88,9 @@ export default function Navbar() {
               <button
                 className="navbar-avatar"
                 id="profile-nav-btn"
-                onClick={() => isCEO ? null : navigate('/profile')}
-                title={isCEO ? 'CEO' : t('nav.profile')}
-                style={isCEO ? { cursor: 'default', background: 'var(--warning)' } : {}}
+                onClick={() => navigate(isCEO ? '/ceo/profile' : '/profile')}
+                title={isCEO ? 'CEO Profile' : t('nav.profile')}
+                style={isCEO ? { background: 'var(--warning)' } : {}}
               >
                 {isCEO ? '👑' : user.name?.charAt(0).toUpperCase()}
               </button>

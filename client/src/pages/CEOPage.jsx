@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ceoAPI } from '../api/index.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useLang } from '../context/LangContext.jsx';
+import { getTranslatedField } from '../utils/translate.js';
 import {
   Plus, Trash2, Edit3, UserCheck, UserX,
   Building2, CalendarDays, Users, X, Save, MapPin, Clock, Shield, AlertTriangle
@@ -35,7 +36,7 @@ const EMPTY_FORM = {
 
 export default function CEOPage() {
   const { isCEO, isAuthenticated } = useAuth();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('restaurants');
@@ -322,14 +323,7 @@ export default function CEOPage() {
                       <div style={{ flex: 1, minWidth: 200 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
                           <h3 style={{ fontSize: '1.05rem', margin: 0 }}>
-                            {(() => {
-                              try {
-                                const parsed = JSON.parse(r.name);
-                                return parsed.uz || parsed.en || r.name;
-                              } catch {
-                                return r.name;
-                              }
-                            })()}
+                            {getTranslatedField(r.name, lang)}
                           </h3>
                           <span className="badge badge-accent">{r.cuisineType}</span>
                         </div>
@@ -407,7 +401,7 @@ export default function CEOPage() {
                     <div>
                       <span style={{ fontWeight: 600 }}>{b.user?.name}</span>
                       <span className="text-xs text-muted" style={{ marginLeft: 8 }}>{b.user?.email}</span>
-                      <span className="badge badge-accent" style={{ marginLeft: 8 }}>{b.restaurant?.name}</span>
+                      <span className="badge badge-accent" style={{ marginLeft: 8 }}>{getTranslatedField(b.restaurant?.name, lang)}</span>
                     </div>
                     {statusBadge(b.status)}
                   </div>

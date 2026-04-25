@@ -4,11 +4,12 @@ import toast from 'react-hot-toast';
 import { bookingAPI } from '../../api/index.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useLang } from '../../context/LangContext.jsx';
+import { getTranslatedField } from '../../utils/translate.js';
 import { useNavigate, Link } from 'react-router-dom';
 
 export default function BookingForm({ restaurant, table, menu, onClose, onSuccess }) {
   const { isAuthenticated, user } = useAuth();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const navigate = useNavigate();
   const today = new Date().toISOString().split('T')[0];
 
@@ -92,7 +93,7 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div>
           <h3>{t('booking.title')} - {table?.label}</h3>
-          <p className="text-xs text-muted">{table?.seats} {t('booking.guests')} • {restaurant.name}</p>
+          <p className="text-xs text-muted">{table?.seats} {t('booking.guests')} • {getTranslatedField(restaurant.name, lang)}</p>
         </div>
         {onClose && (
           <button onClick={onClose} className="btn btn-secondary btn-sm" style={{ padding: 6 }}>

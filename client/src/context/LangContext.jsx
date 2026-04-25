@@ -25,7 +25,7 @@ export function LangProvider({ children }) {
     for (const part of parts) {
       val = val?.[part];
     }
-    return val || key;
+    return (typeof val === 'string') ? val : key;
   };
 
   return (
