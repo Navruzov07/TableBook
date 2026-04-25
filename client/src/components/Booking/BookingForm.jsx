@@ -3,10 +3,12 @@ import { Calendar, Clock, Users, FileText, ShoppingBag, Plus, Minus, X } from 'l
 import toast from 'react-hot-toast';
 import { bookingAPI } from '../../api/index.js';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { useNavigate } from 'react-router-dom';
+import { useLang } from '../../context/LangContext.jsx';
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function BookingForm({ restaurant, table, menu, onClose, onSuccess }) {
   const { isAuthenticated, user } = useAuth();
+  const { t } = useLang();
   const navigate = useNavigate();
   const today = new Date().toISOString().split('T')[0];
 
@@ -49,16 +51,16 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      toast.error('Please sign in to book');
+      toast.error(t('booking.loginRequired'));
       navigate('/login');
       return;
     }
     if (!user?.isPhoneVerified) {
-      toast.error('Phone verification is required to make a booking.');
+      toast.error(t('booking.phoneVerifRequired'));
       return;
     }
     if (!termsAccepted) {
-      toast.error('You must agree to the Terms of Service to book.');
+      toast.error(t('booking.termsRequired'));
       return;
     }
     setLoading(true);
@@ -76,10 +78,10 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
         })),
         termsAccepted
       });
-      toast.success('🎉 Booking confirmed!');
+      toast.success('🎉 ' + t('booking.success'));
       onSuccess?.();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Booking failed');
+      toast.error(err.response?.data?.error || t('common.error'));
     } finally {
       setLoading(false);
     }
@@ -89,8 +91,8 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
     <div className="card animate-slide-up" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div>
-          <h3>Reserve {table?.label}</h3>
-          <p className="text-xs text-muted">{table?.seats} seats • {restaurant.name}</p>
+          <h3>{t('booking.title')} - {table?.label}</h3>
+          <p className="text-xs text-muted">{table?.seats} {t('booking.guests')} • {restaurant.name}</p>
         </div>
         {onClose && (
           <button onClick={onClose} className="btn btn-secondary btn-sm" style={{ padding: 6 }}>
@@ -102,11 +104,11 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <div className="input-group">
-            <label><Calendar size={12} style={{ verticalAlign: 'middle' }} /> Date</label>
+            <label><Calendar size={12} style={{ verticalAlign: 'middle' }} /> {t('booking.date')}</label>
             <input type="date" className="input" value={form.bookingDate} onChange={update('bookingDate')} min={today} required />
           </div>
           <div className="input-group">
-            <label><Clock size={12} style={{ verticalAlign: 'middle' }} /> Time</label>
+            <label><Clock size={12} style={{ verticalAlign: 'middle' }} /> {t('booking.time')}</label>
             <select className="input" value={form.startTime} onChange={update('startTime')}>
               {Array.from({ length: 28 }, (_, i) => {
                 const h = Math.floor(i / 2) + 10;
@@ -119,24 +121,24 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
         </div>
 
         <div className="input-group">
-          <label><Users size={12} style={{ verticalAlign: 'middle' }} /> Guests</label>
+          <label><Users size={12} style={{ verticalAlign: 'middle' }} /> {t('booking.guests')}</label>
           <select className="input" value={form.guestCount} onChange={update('guestCount')}>
             {Array.from({ length: table?.seats || 10 }, (_, i) => (
-              <option key={i + 1} value={i + 1}>{i + 1} {i === 0 ? 'guest' : 'guests'}</option>
+              <option key={i + 1} value={i + 1}>{i + 1}</option>
             ))}
           </select>
         </div>
 
         <div className="input-group">
-          <label><FileText size={12} style={{ verticalAlign: 'middle' }} /> Special Requests</label>
-          <textarea className="input" placeholder="Birthday, allergies, wheelchair..." value={form.notes} onChange={update('notes')} />
+          <label><FileText size={12} style={{ verticalAlign: 'middle' }} /> {t('booking.notes')}</label>
+          <textarea className="input" placeholder={t('booking.notesPlaceholder')} value={form.notes} onChange={update('notes')} />
         </div>
 
         {/* Pre-order Section */}
         <div>
           {isAuthenticated && user?.trustScore < 50 ? (
             <div style={{ padding: 12, background: 'rgba(255, 60, 60, 0.1)', color: 'var(--danger)', borderRadius: 8, fontSize: '0.85rem' }}>
-              ⚠️ Your trust score is too low ({user.trustScore}) to use pre-order functionality. Standard bookings only.
+              {t('booking.trustScoreLow').replace('{score}', user.trustScore)}
             </div>
           ) : (
             <button
@@ -147,9 +149,9 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
             >
               <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <ShoppingBag size={14} />
-                Pre-order Food {preorder.length > 0 && `(${preorder.length})`}
+                {t('booking.preorderFood')} {preorder.length > 0 && `(${preorder.length})`}
               </span>
-              <span className="text-xs">{showPreorder ? 'Hide' : 'Show'} Menu</span>
+              <span className="text-xs">{showPreorder ? t('booking.hideMenu') : t('booking.showMenu')}</span>
             </button>
           )}
 
@@ -183,7 +185,7 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
           {/* Pre-order summary */}
           {preorder.length > 0 && (
             <div style={{ marginTop: 10, padding: 12, background: 'var(--bg-glass)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
-              <p className="text-xs text-muted" style={{ marginBottom: 8, fontWeight: 600 }}>YOUR PRE-ORDER</p>
+              <p className="text-xs text-muted" style={{ marginBottom: 8, fontWeight: 600 }}>{t('booking.preorder').toUpperCase()}</p>
               {preorder.map(p => (
                 <div key={p.menuItemId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                   <span className="text-sm" style={{ flex: 1 }}>{p.name}</span>
@@ -206,7 +208,7 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
                 </div>
               ))}
               <div style={{ borderTop: '1px solid var(--border)', paddingTop: 8, marginTop: 8, display: 'flex', justifyContent: 'space-between' }}>
-                <span className="text-sm" style={{ fontWeight: 600 }}>Total</span>
+                <span className="text-sm" style={{ fontWeight: 600 }}>{t('booking.total')}</span>
                 <span className="text-sm" style={{ fontWeight: 700, color: 'var(--accent-light)' }}>${preorderTotal.toFixed(2)}</span>
               </div>
             </div>
@@ -215,8 +217,8 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
 
         {isAuthenticated && !user?.isPhoneVerified && (
           <div style={{ padding: 12, background: 'rgba(255, 165, 0, 0.1)', color: '#cc8400', borderRadius: 8, fontSize: '0.85rem', textAlign: 'center' }}>
-            <strong>Phone Verification Required</strong><br />
-            You must verify your phone number in your profile before you can book.
+            <strong>{t('booking.phoneVerifTitle')}</strong><br />
+            {t('booking.phoneVerifDesc')}
           </div>
         )}
 
@@ -231,7 +233,11 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
               required 
             />
             <span style={{ color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-              I agree to the TableBook Terms of Service, acknowledge the Cancellation Policy, and accept full responsibility for this reservation and any associated deposit or pre-order.
+              {t('booking.agreePrefix')}
+              <Link to="/terms" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>
+                {t('booking.agreeLink')}
+              </Link>
+              {t('booking.agreeSuffix')}
             </span>
           </label>
         </div>
@@ -241,7 +247,7 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
           disabled={loading || !termsAccepted || (isAuthenticated && !user?.isPhoneVerified)} 
           type="submit"
         >
-          {loading ? 'Booking...' : 'Confirm Reservation'}
+          {loading ? t('common.loading') : t('booking.bookingTitle')}
         </button>
       </form>
     </div>

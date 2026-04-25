@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { restaurantAPI } from '../api/index.js';
 import { useLang } from '../context/LangContext.jsx';
+import { getTranslatedField } from '../utils/translate.js';
 import { Star, MapPin, Clock, ChevronRight, Search } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
@@ -39,7 +40,7 @@ export default function HomePage() {
   const [flyTo, setFlyTo] = useState(null);
   const [hoveredId, setHoveredId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,10 +50,11 @@ export default function HomePage() {
     }).catch(() => setLoading(false));
   }, []);
 
-  const filtered = restaurants.filter(r =>
-    r.name.toLowerCase().includes(search.toLowerCase()) ||
-    r.cuisineType.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = restaurants.filter(r => {
+    const tName = getTranslatedField(r.name, lang);
+    return tName.toLowerCase().includes(search.toLowerCase()) ||
+           r.cuisineType.toLowerCase().includes(search.toLowerCase());
+  });
 
   const center = restaurants.length > 0
     ? [restaurants.reduce((s, r) => s + r.lat, 0) / restaurants.length,
@@ -112,7 +114,9 @@ export default function HomePage() {
                   )}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <h3 style={{ fontSize: '1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</h3>
+                      <h3 style={{ fontSize: '1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {getTranslatedField(r.name, lang)}
+                      </h3>
                       <div className="rating">
                         <Star size={13} fill="currentColor" />
                         <span style={{ fontSize: '0.85rem' }}>{r.rating}</span>
@@ -152,7 +156,7 @@ export default function HomePage() {
               >
                 <Popup>
                   <div style={{ fontFamily: 'Outfit, sans-serif', textAlign: 'center' }}>
-                    <strong style={{ fontSize: 14 }}>{r.name}</strong><br />
+                    <strong style={{ fontSize: 14 }}>{getTranslatedField(r.name, lang)}</strong><br />
                     <span style={{ color: '#f59e0b', fontWeight: 700 }}>⭐ {r.rating}/10</span><br />
                     <span style={{ fontSize: 12, color: '#666' }}>{r.cuisineType}</span><br />
                     <button

@@ -26,9 +26,11 @@ function Modal({ title, onClose, children }) {
 
 // ── Restaurant form (create / edit) ───────────────────────────────────────────
 const EMPTY_FORM = {
-  name: '', address: '', lat: '', lng: '',
+  name: { uz: '', ru: '', en: '' },
+  description: { uz: '', ru: '', en: '' },
+  address: '', lat: '', lng: '',
   cuisineType: '', openingHours: '', phone: '',
-  description: '', imageUrl: '', defaultBookingDuration: 90, rating: 0
+  imageUrl: '', defaultBookingDuration: 90, rating: 0
 };
 
 export default function CEOPage() {
@@ -101,10 +103,23 @@ export default function CEOPage() {
 
   const openEdit = (r) => {
     setEditingRestaurant(r.id);
+    const parseJSONField = (val, fallback) => {
+      if (!val) return fallback;
+      try {
+        const parsed = JSON.parse(val);
+        return typeof parsed === 'object' ? parsed : fallback;
+      } catch (e) {
+        return { uz: val, ru: val, en: val };
+      }
+    };
+
+    setEditingRestaurant(r.id);
     setRestaurantForm({
-      name: r.name, address: r.address, lat: r.lat, lng: r.lng,
+      name: parseJSONField(r.name, { uz: '', ru: '', en: '' }),
+      description: parseJSONField(r.description, { uz: '', ru: '', en: '' }),
+      address: r.address, lat: r.lat, lng: r.lng,
       cuisineType: r.cuisineType, openingHours: r.openingHours,
-      phone: r.phone || '', description: r.description || '',
+      phone: r.phone || '',
       imageUrl: r.imageUrl || '', defaultBookingDuration: r.defaultBookingDuration, rating: r.rating
     });
     setShowRestaurantModal(true);
@@ -113,11 +128,17 @@ export default function CEOPage() {
   const handleSaveRestaurant = async (e) => {
     e.preventDefault();
     try {
+      const payload = {
+        ...restaurantForm,
+        name: JSON.stringify(restaurantForm.name),
+        description: JSON.stringify(restaurantForm.description)
+      };
+
       if (editingRestaurant) {
-        await ceoAPI.updateRestaurant(editingRestaurant, restaurantForm);
+        await ceoAPI.updateRestaurant(editingRestaurant, payload);
         toast.success(t('ceo.updated'));
       } else {
-        await ceoAPI.createRestaurant(restaurantForm);
+        await ceoAPI.createRestaurant(payload);
         toast.success(t('ceo.created'));
       }
       setShowRestaurantModal(false);
@@ -152,7 +173,7 @@ export default function CEOPage() {
     e.preventDefault();
     try {
       await ceoAPI.updateDepositRules(editingDepositId, depositForm);
-      toast.success('Deposit rules updated');
+      toast.success(t('ceo.depositRulesUpdated'));
       setShowDepositModal(false);
       loadAll();
     } catch {
@@ -197,7 +218,7 @@ export default function CEOPage() {
     if (!confirm(`Are you sure you want to ${action} ${user.name}?`)) return;
     try {
       await ceoAPI.banUser(user.id, !user.isBanned);
-      toast.success(`User ${action.toLowerCase()}ned successfully`);
+      toast.success(action === 'Ban' ? t('ceo.userBanned') : t('ceo.userUnbanned'));
       loadAll();
     } catch {
       toast.error(t('common.error'));
@@ -210,7 +231,7 @@ export default function CEOPage() {
     if (parsed === user.trustScore) return; // no change
     try {
       await ceoAPI.updateTrustScore(user.id, parsed);
-      toast.success('Trust score updated');
+      toast.success(t('ceo.trustScoreUpdated'));
       loadAll();
     } catch {
       toast.error(t('common.error'));
@@ -300,7 +321,16 @@ export default function CEOPage() {
                       {/* Info */}
                       <div style={{ flex: 1, minWidth: 200 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                          <h3 style={{ fontSize: '1.05rem', margin: 0 }}>{r.name}</h3>
+                          <h3 style={{ fontSize: '1.05rem', margin: 0 }}>
+                            {(() => {
+                              try {
+                                const parsed = JSON.parse(r.name);
+                                return parsed.uz || parsed.en || r.name;
+                              } catch {
+                                return r.name;
+                              }
+                            })()}
+                          </h3>
                           <span className="badge badge-accent">{r.cuisineType}</span>
                         </div>
                         <p className="text-xs text-muted" style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
@@ -454,8 +484,16 @@ export default function CEOPage() {
           <form onSubmit={handleSaveRestaurant} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div className="input-group" style={{ gridColumn: '1 / -1' }}>
-                <label>{t('ceo.name')} *</label>
-                <input className="input" value={restaurantForm.name} onChange={e => setRestaurantForm(f => ({ ...f, name: e.target.value }))} required />
+                <label>{t('ceo.name')} (UZ) *</label>
+                <input className="input" value={restaurantForm.name.uz} onChange={e => setRestaurantForm(f => ({ ...f, name: { ...f.name, uz: e.target.value } }))} required />
+              </div>
+              <div className="input-group" style={{ gridColumn: '1 / -1' }}>
+                <label>{t('ceo.name')} (RU) *</label>
+                <input className="input" value={restaurantForm.name.ru} onChange={e => setRestaurantForm(f => ({ ...f, name: { ...f.name, ru: e.target.value } }))} required />
+              </div>
+              <div className="input-group" style={{ gridColumn: '1 / -1' }}>
+                <label>{t('ceo.name')} (EN) *</label>
+                <input className="input" value={restaurantForm.name.en} onChange={e => setRestaurantForm(f => ({ ...f, name: { ...f.name, en: e.target.value } }))} required />
               </div>
               <div className="input-group" style={{ gridColumn: '1 / -1' }}>
                 <label>{t('ceo.address')} *</label>
@@ -494,8 +532,16 @@ export default function CEOPage() {
                 <input className="input" placeholder="https://..." value={restaurantForm.imageUrl} onChange={e => setRestaurantForm(f => ({ ...f, imageUrl: e.target.value }))} />
               </div>
               <div className="input-group" style={{ gridColumn: '1 / -1' }}>
-                <label>{t('ceo.description')}</label>
-                <textarea className="input" value={restaurantForm.description} onChange={e => setRestaurantForm(f => ({ ...f, description: e.target.value }))} style={{ minHeight: 70 }} />
+                <label>{t('ceo.description')} (UZ)</label>
+                <textarea className="input" value={restaurantForm.description.uz} onChange={e => setRestaurantForm(f => ({ ...f, description: { ...f.description, uz: e.target.value } }))} style={{ minHeight: 70 }} />
+              </div>
+              <div className="input-group" style={{ gridColumn: '1 / -1' }}>
+                <label>{t('ceo.description')} (RU)</label>
+                <textarea className="input" value={restaurantForm.description.ru} onChange={e => setRestaurantForm(f => ({ ...f, description: { ...f.description, ru: e.target.value } }))} style={{ minHeight: 70 }} />
+              </div>
+              <div className="input-group" style={{ gridColumn: '1 / -1' }}>
+                <label>{t('ceo.description')} (EN)</label>
+                <textarea className="input" value={restaurantForm.description.en} onChange={e => setRestaurantForm(f => ({ ...f, description: { ...f.description, en: e.target.value } }))} style={{ minHeight: 70 }} />
               </div>
             </div>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>

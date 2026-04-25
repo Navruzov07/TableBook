@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { bookingAPI } from '../api/index.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useLang } from '../context/LangContext.jsx';
+import { getTranslatedField } from '../utils/translate.js';
 import { Calendar, Clock, Users, MapPin, X, ShoppingBag, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function MyBookingsPage() {
   const { isAuthenticated } = useAuth();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -65,7 +66,7 @@ export default function MyBookingsPage() {
             <div key={b.id} className="card animate-fade-in" style={{ padding: 18 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                 <div>
-                  <h3 style={{ fontSize: '1.05rem', marginBottom: 4 }}>{b.restaurant?.name}</h3>
+                  <h3 style={{ fontSize: '1.05rem', marginBottom: 4 }}>{getTranslatedField(b.restaurant?.name, lang)}</h3>
                   <p className="text-xs text-muted" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <MapPin size={11} /> {b.restaurant?.address}
                   </p>

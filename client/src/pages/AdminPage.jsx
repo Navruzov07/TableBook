@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { adminAPI, restaurantAPI } from '../api/index.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useLang } from '../context/LangContext.jsx';
+import { getTranslatedField } from '../utils/translate.js';
 import FloorPlanViewer from '../components/FloorPlan/FloorPlanViewer.jsx';
 import FloorPlanEditor from '../components/FloorPlan/FloorPlanEditor.jsx';
 import { Plus, Trash2, Save, Edit3, Calendar, Users, Check, X } from 'lucide-react';
@@ -10,7 +11,7 @@ import toast from 'react-hot-toast';
 
 export default function AdminPage() {
   const { user, isAdmin, isAuthenticated } = useAuth();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('bookings');
   const [restaurant, setRestaurant] = useState(null);
@@ -47,7 +48,7 @@ export default function AdminPage() {
   const updateBookingStatus = async (id, status) => {
     try {
       await adminAPI.updateBookingStatus(id, status);
-      toast.success(`Booking ${status}`);
+      toast.success(t('admin.bookingStatusUpdated').replace('{status}', status));
       setBookings(bookings.map(b => b.id === id ? { ...b, status } : b));
     } catch {
       toast.error(t('common.error'));
@@ -72,10 +73,10 @@ export default function AdminPage() {
     try {
       if (editingMenuItem) {
         await adminAPI.updateMenuItem(editingMenuItem, menuForm);
-        toast.success('Updated');
+        toast.success(t('admin.itemUpdated'));
       } else {
         await adminAPI.addMenuItem(menuForm);
-        toast.success('Added');
+        toast.success(t('admin.itemAdded'));
       }
       setMenuForm({ name: '', description: '', price: '', category: 'Mains', imageUrl: '' });
       setEditingMenuItem(null);
@@ -96,7 +97,7 @@ export default function AdminPage() {
     if (!confirm(t('admin.deleteConfirm'))) return;
     try {
       await adminAPI.deleteMenuItem(id);
-      toast.success('Deleted');
+      toast.success(t('admin.itemDeleted'));
       const menuData = await restaurantAPI.menu(user.restaurantId);
       setMenu(menuData.data);
     } catch {
@@ -124,7 +125,7 @@ export default function AdminPage() {
     <div className="container" style={{ paddingTop: 16, paddingBottom: 40 }}>
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ fontSize: '1.5rem' }}>{t('admin.title')}</h1>
-        <p className="text-muted text-sm">{restaurant.name}</p>
+        <p className="text-muted text-sm">{getTranslatedField(restaurant.name, lang)}</p>
       </div>
 
       <div className="tabs" style={{ marginBottom: 20, display: 'inline-flex' }}>

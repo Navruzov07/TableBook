@@ -127,4 +127,37 @@ router.get('/me', authenticate, async (req, res) => {
   }
 });
 
+// PUT /api/auth/profile
+router.put('/profile', authenticate, async (req, res) => {
+  try {
+    const { name, phone } = req.body;
+    
+    // CEO mock update (doesn't persist to DB, but returns success)
+    if (req.user.role === 'ceo') {
+      return res.json({ id: 0, name: name || 'CEO', phone: phone || '', email: CEO_EMAIL, role: 'ceo', restaurantId: null });
+    }
+
+    const data = {};
+    if (name !== undefined) data.name = name;
+    if (phone !== undefined) {
+      data.phone = phone || null;
+      // If phone changes, we might want to reset isPhoneVerified, but for now we just save it
+    }
+
+    const user = await req.prisma.user.update({
+      where: { id: req.user.id },
+      data,
+      select: { 
+        id: true, name: true, email: true, phone: true, role: true, restaurantId: true,
+        isPhoneVerified: true, trustScore: true, isBanned: true 
+      }
+    });
+    
+    res.json(user);
+  } catch (err) {
+    console.error('Update profile error:', err);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
 export default router;

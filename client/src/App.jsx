@@ -11,6 +11,8 @@ import AdminPage from './pages/AdminPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import CEOPage from './pages/CEOPage.jsx';
+import CEOProfilePage from './pages/CEOProfilePage.jsx';
+import TermsPage from './pages/TermsPage.jsx';
 import './index.css';
 
 export default function App() {
@@ -29,6 +31,8 @@ export default function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/ceo" element={<CEOPage />} />
+                <Route path="/ceo/profile" element={<CEOProfilePage />} />
+                <Route path="/terms" element={<TermsPage />} />
               </Routes>
             </main>
             <Toaster

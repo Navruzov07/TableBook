@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { restaurantAPI } from '../api/index.js';
 import { useLang } from '../context/LangContext.jsx';
+import { getTranslatedField } from '../utils/translate.js';
 import FloorPlanViewer from '../components/FloorPlan/FloorPlanViewer.jsx';
 import BookingForm from '../components/Booking/BookingForm.jsx';
 import MenuList from '../components/Menu/MenuList.jsx';
@@ -9,7 +10,7 @@ import { Star, MapPin, Clock, Phone } from 'lucide-react';
 
 export default function RestaurantPage() {
   const { id } = useParams();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [restaurant, setRestaurant] = useState(null);
   const [menu, setMenu] = useState(null);
   const [availability, setAvailability] = useState(null);
@@ -72,7 +73,7 @@ export default function RestaurantPage() {
           )}
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-              <h1 style={{ fontSize: '1.75rem' }}>{restaurant.name}</h1>
+              <h1 style={{ fontSize: '1.75rem' }}>{getTranslatedField(restaurant.name, lang)}</h1>
               <div className="rating" style={{ fontSize: '1.1rem' }}>
                 <Star size={18} fill="currentColor" />
                 {restaurant.rating}/10
@@ -83,7 +84,7 @@ export default function RestaurantPage() {
               <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={14} /> {restaurant.openingHours}</span>
               {restaurant.phone && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Phone size={14} /> {restaurant.phone}</span>}
             </div>
-            {restaurant.description && <p className="text-sm text-muted" style={{ marginTop: 8, maxWidth: 600 }}>{restaurant.description}</p>}
+            {restaurant.description && <p className="text-sm text-muted" style={{ marginTop: 8, maxWidth: 600 }}>{getTranslatedField(restaurant.description, lang)}</p>}
             <span className="badge badge-accent mt-1">{restaurant.cuisineType}</span>
           </div>
         </div>
