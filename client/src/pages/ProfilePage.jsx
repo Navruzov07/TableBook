@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useLang } from '../context/LangContext.jsx';
+import { authAPI } from '../api/index.js';
 import { User, Phone, Save, ChevronLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, refreshUser } = useAuth();
   const { t } = useLang();
   const navigate = useNavigate();
 
@@ -16,18 +17,11 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!isAuthenticated) { navigate('/login'); return; }
-    // Load from localStorage (profile data separate from auth user)
-    const saved = localStorage.getItem('userProfile');
-    if (saved) {
-      setForm(JSON.parse(saved));
-    } else {
-      // Pre-fill from auth user if available
-      setForm(f => ({
-        ...f,
-        name: user?.name || '',
-        phone: user?.phone || '',
-      }));
-    }
+    setForm(f => ({
+      ...f,
+      name: user?.name || '',
+      phone: user?.phone || '',
+    }));
   }, [isAuthenticated, user, navigate]);
 
   const validate = () => {
@@ -43,10 +37,19 @@ export default function ProfilePage() {
     e.preventDefault();
     if (!validate()) return;
     setSaving(true);
-    await new Promise(r => setTimeout(r, 400)); // simulate async save
-    localStorage.setItem('userProfile', JSON.stringify(form));
-    setSaving(false);
-    toast.success(t('profile.saved'));
+    try {
+      const payload = {
+        name: form.surname.trim() ? `${form.name.trim()} ${form.surname.trim()}` : form.name.trim(),
+        phone: form.phone.trim(),
+      };
+      await authAPI.updateProfile(payload);
+      await refreshUser();
+      toast.success(t('profile.saved'));
+    } catch (err) {
+      toast.error(err.response?.data?.error || t('common.error'));
+    } finally {
+      setSaving(false);
+    }
   };
 
   const update = (field) => (e) => {

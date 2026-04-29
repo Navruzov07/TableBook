@@ -31,6 +31,7 @@ router.post('/register', async (req, res) => {
         email,
         passwordHash,
         phone: phone || null,
+        isPhoneVerified: Boolean(phone?.trim()),
         role: role === 'admin' ? 'admin' : 'customer'
       }
     });
@@ -44,7 +45,7 @@ router.post('/register', async (req, res) => {
     res.status(201).json({
       token,
       user: { 
-        id: user.id, name: user.name, email: user.email, role: user.role, 
+        id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role, 
         isPhoneVerified: user.isPhoneVerified, trustScore: user.trustScore, isBanned: user.isBanned 
       }
     });
@@ -143,7 +144,7 @@ router.put('/profile', authenticate, async (req, res) => {
     if (name !== undefined) data.name = name;
     if (phone !== undefined) {
       data.phone = phone || null;
-      // If phone changes, we might want to reset isPhoneVerified, but for now we just save it
+      data.isPhoneVerified = Boolean(phone?.trim());
     }
 
     const user = await req.prisma.user.update({

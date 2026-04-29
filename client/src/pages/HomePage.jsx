@@ -45,15 +45,16 @@ export default function HomePage() {
 
   useEffect(() => {
     restaurantAPI.list().then(res => {
-      setRestaurants(res.data);
+      setRestaurants(Array.isArray(res.data) ? res.data : []);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
 
   const filtered = restaurants.filter(r => {
     const tName = getTranslatedField(r.name, lang);
+    const cuisine = r.cuisineType || '';
     return tName.toLowerCase().includes(search.toLowerCase()) ||
-           r.cuisineType.toLowerCase().includes(search.toLowerCase());
+           cuisine.toLowerCase().includes(search.toLowerCase());
   });
 
   const center = restaurants.length > 0

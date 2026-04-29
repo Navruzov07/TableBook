@@ -10,10 +10,18 @@ import ceoRoutes from './routes/ceo.js';
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3001;
+const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173,http://127.0.0.1:5173')
+  .split(',')
+  .map(origin => origin.trim());
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 app.use(express.json({ limit: '5mb' }));
@@ -21,6 +29,31 @@ app.use(express.json({ limit: '5mb' }));
 // Make prisma available to routes
 app.use((req, res, next) => {
   req.prisma = prisma;
+  next();
+});
+
+// Keep API data responses consistent while leaving auth token responses raw.
+app.use('/api', (req, res, next) => {
+  const json = res.json.bind(res);
+
+  res.json = (body) => {
+    if (
+      req.path.startsWith('/auth') ||
+      req.path === '/health' ||
+      req.originalUrl === '/api/health' ||
+      body?.success !== undefined ||
+      body?.token
+    ) {
+      return json(body);
+    }
+
+    if (body?.error) {
+      return json({ success: false, error: body.error });
+    }
+
+    return json({ success: true, data: body });
+  };
+
   next();
 });
 
