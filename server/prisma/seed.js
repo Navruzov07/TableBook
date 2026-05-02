@@ -150,35 +150,39 @@ async function main() {
   }
   console.log('✅ Created menu items for all restaurants');
 
-  // --- Create test users (phone-based, no password) ---
-  const admin = await prisma.user.create({
-    data: {
-      name: 'Admin User',
-      phone: '+998750000001',
-      role: 'admin',
-      restaurantId: restaurants[0].id
-    }
-  });
+  try {
+    // --- Create test users (phone-based, no password) ---
+    const admin = await prisma.user.create({
+      data: {
+        name: 'Admin User',
+        phone: '+998750000001',
+        role: 'admin',
+        restaurantId: restaurants[0].id
+      }
+    });
 
-  const customer = await prisma.user.create({
-    data: {
-      name: 'Test Customer',
-      phone: '+998750000002',
-      role: 'customer'
-    }
-  });
+    const customer = await prisma.user.create({
+      data: {
+        name: 'Test Customer',
+        phone: '+998750000002',
+        role: 'customer'
+      }
+    });
 
-  console.log('✅ Created test users');
-  console.log('');
-  console.log('📋 Test phones (use OTP to login):');
-  console.log('   Admin:    +998750000001');
-  console.log('   Customer: +998750000002');
-  console.log('   OTP code will be printed to console (mock SMS)');
-  console.log('');
-  console.log('🔑 CEO login: use the Staff Access passphrase from CEO_SECRET env var');
-  console.log('   Default: tablebook-ceo-secret-2024');
-  console.log('');
-  console.log('🎉 Seeding complete!');
+    console.log('✅ Created test users');
+    console.log('');
+    console.log('📋 Test phones (use OTP to login):');
+    console.log('   Admin:    +998750000001');
+    console.log('   Customer: +998750000002');
+    console.log('   OTP code will be printed to console (mock SMS)');
+    console.log('');
+    console.log('🔑 CEO login: use the Staff Access passphrase from CEO_SECRET env var');
+    console.log('   Default: tablebook-ceo-secret-2024');
+    console.log('');
+    console.log('🎉 Seeding complete!');
+  } catch (error) {
+    console.log('⚠️ Seed data already exists or failed to insert. Skipping test users.');
+  }
 }
 
 main()
