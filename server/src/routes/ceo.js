@@ -14,7 +14,7 @@ router.get('/restaurants', async (req, res) => {
     const restaurants = await req.prisma.restaurant.findMany({
       include: {
         admins: {
-          select: { id: true, name: true, email: true, role: true }
+          select: { id: true, name: true, phone: true, role: true }
         },
         _count: { select: { bookings: true, tables: true } }
       },
@@ -140,7 +140,7 @@ router.post('/assign-admin', async (req, res) => {
         role: 'admin',
         restaurantId: parseInt(restaurantId)
       },
-      select: { id: true, name: true, email: true, role: true, restaurantId: true }
+      select: { id: true, name: true, phone: true, role: true, restaurantId: true }
     });
 
     res.json(user);
@@ -159,7 +159,7 @@ router.post('/remove-admin', async (req, res) => {
     const user = await req.prisma.user.update({
       where: { id: parseInt(userId) },
       data: { role: 'customer', restaurantId: null },
-      select: { id: true, name: true, email: true, role: true }
+      select: { id: true, name: true, phone: true, role: true }
     });
 
     res.json(user);
@@ -175,7 +175,7 @@ router.post('/remove-admin', async (req, res) => {
 router.get('/users', async (req, res) => {
   try {
     const users = await req.prisma.user.findMany({
-      select: { id: true, name: true, email: true, phone: true, role: true, restaurantId: true, isBanned: true, trustScore: true, isPhoneVerified: true, createdAt: true },
+      select: { id: true, name: true, phone: true, email: true, role: true, restaurantId: true, isBanned: true, trustScore: true, isPhoneVerified: true, createdAt: true },
       orderBy: { createdAt: 'desc' }
     });
     res.json(users);
@@ -197,7 +197,7 @@ router.post('/users/:id/ban', async (req, res) => {
     const user = await req.prisma.user.update({
       where: { id },
       data: { isBanned },
-      select: { id: true, name: true, email: true, isBanned: true }
+      select: { id: true, name: true, phone: true, isBanned: true }
     });
 
     res.json(user);
@@ -220,7 +220,7 @@ router.post('/users/:id/trust-score', async (req, res) => {
     const user = await req.prisma.user.update({
       where: { id },
       data: { trustScore: parseInt(trustScore) },
-      select: { id: true, name: true, email: true, trustScore: true }
+      select: { id: true, name: true, phone: true, trustScore: true }
     });
 
     res.json(user);
@@ -244,7 +244,7 @@ router.get('/bookings', async (req, res) => {
     const bookings = await req.prisma.booking.findMany({
       where,
       include: {
-        user: { select: { name: true, email: true, phone: true } },
+        user: { select: { name: true, phone: true } },
         table: { select: { label: true, seatCount: true } },
         restaurant: { select: { name: true } },
         preorderItems: { include: { menuItem: { select: { name: true } } } }

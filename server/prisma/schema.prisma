@@ -3,27 +3,37 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
-  name          String
-  email         String    @unique
-  passwordHash  String    @map("password_hash")
-  phone         String?
-  role          String    @default("customer") // "customer" | "admin"
-  restaurantId  Int?      @map("restaurant_id")
-  isPhoneVerified Boolean @default(false) @map("is_phone_verified")
-  trustScore    Int       @default(100)   @map("trust_score")
-  isBanned      Boolean   @default(false) @map("is_banned")
-  createdAt     DateTime  @default(now()) @map("created_at")
+  id              Int       @id @default(autoincrement())
+  name            String    @default("")
+  phone           String    @unique
+  email           String?   // optional, for receipts
+  role            String    @default("customer") // "customer" | "admin"
+  restaurantId    Int?      @map("restaurant_id")
+  isPhoneVerified Boolean   @default(true) @map("is_phone_verified") // always true after OTP
+  trustScore      Int       @default(100)  @map("trust_score")
+  isBanned        Boolean   @default(false) @map("is_banned")
+  createdAt       DateTime  @default(now()) @map("created_at")
 
   restaurant    Restaurant? @relation(fields: [restaurantId], references: [id])
   bookings      Booking[]
 
   @@map("users")
+}
+
+model OtpCode {
+  id        Int      @id @default(autoincrement())
+  phone     String
+  code      String
+  expiresAt DateTime @map("expires_at")
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("otp_codes")
 }
 
 model Restaurant {

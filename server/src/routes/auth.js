@@ -1,128 +1,165 @@
 import { Router } from 'express';
-import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET, authenticate } from '../middleware/auth.js';
+import { sendSMS, generateOTP } from '../utils/sms.js';
 
 const router = Router();
 
-// CEO hardcoded credentials (MVP — no DB lookup needed)
-const CEO_EMAIL = 'tablebookceo@gmail.com';
-const CEO_PASSWORD = 'navruzov7ceo!';
+// ── CEO passphrase backdoor (no phone / no DB record needed) ──────────────────
+// Set CEO_SECRET in your .env to something long and random.
+// On the login page a hidden "Staff Access" button reveals a passphrase field.
+const CEO_SECRET = process.env.CEO_SECRET || 'tablebook-ceo-secret-2024';
 
-// POST /api/auth/register
-router.post('/register', async (req, res) => {
-  console.log("REGISTER HIT", req.body);
+// OTP validity window (minutes)
+const OTP_TTL_MINUTES = 5;
+
+// ── POST /api/auth/send-otp ───────────────────────────────────────────────────
+router.post('/send-otp', async (req, res) => {
   try {
-    const { name, email, password, phone, role } = req.body;
+    const { phone } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Name, email, and password are required' });
+    if (!phone || !/^\+?[1-9]\d{7,14}$/.test(phone.replace(/[\s\-()]/g, ''))) {
+      return res.status(400).json({ error: 'Valid phone number required (e.g. +998901234567)' });
     }
 
-    const existing = await req.prisma.user.findUnique({ where: { email } });
-    if (existing) {
-      return res.status(409).json({ error: 'Email already registered' });
-    }
+    const normalizedPhone = phone.replace(/[\s\-()]/g, '');
 
-    const passwordHash = await bcrypt.hash(password, 10);
-    const user = await req.prisma.user.create({
-      data: {
-        name,
-        email,
-        passwordHash,
-        phone: phone || null,
-        isPhoneVerified: Boolean(phone?.trim()),
-        role: role === 'admin' ? 'admin' : 'customer'
-      }
+    // Invalidate any existing unused OTPs for this phone
+    await req.prisma.otpCode.updateMany({
+      where: { phone: normalizedPhone, used: false },
+      data: { used: true }
     });
 
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role, restaurantId: user.restaurantId },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const code = generateOTP();
+    const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
 
-    res.status(201).json({
-      token,
-      user: { 
-        id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role, 
-        isPhoneVerified: user.isPhoneVerified, trustScore: user.trustScore, isBanned: user.isBanned 
-      }
+    await req.prisma.otpCode.create({
+      data: { phone: normalizedPhone, code, expiresAt }
     });
+
+    await sendSMS(normalizedPhone, `Your TableBook verification code: ${code}\nValid for ${OTP_TTL_MINUTES} minutes. Do not share it.`);
+
+    res.json({ sent: true, expiresIn: OTP_TTL_MINUTES * 60 });
   } catch (err) {
-    console.error('Register error:', err);
-    res.status(500).json({ error: 'Registration failed' });
+    console.error('Send OTP error:', err);
+    res.status(500).json({ error: 'Failed to send OTP' });
   }
 });
 
-// POST /api/auth/login
-router.post('/login', async (req, res) => {
-  console.log("LOGIN HIT", req.body);
+// ── POST /api/auth/verify-otp ─────────────────────────────────────────────────
+router.post('/verify-otp', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { phone, code, name } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+    if (!phone || !code) {
+      return res.status(400).json({ error: 'Phone and code are required' });
     }
 
-    // ── CEO shortcut ──────────────────────────────────────────────────────────
-    if (email === CEO_EMAIL && password === CEO_PASSWORD) {
-      const token = jwt.sign(
-        { id: 0, email: CEO_EMAIL, role: 'ceo', restaurantId: null },
-        JWT_SECRET,
-        { expiresIn: '7d' }
-      );
-      return res.json({
-        token,
-        user: { id: 0, name: 'CEO', email: CEO_EMAIL, role: 'ceo', restaurantId: null }
+    const normalizedPhone = phone.replace(/[\s\-()]/g, '');
+
+    // Find most recent valid OTP
+    const otp = await req.prisma.otpCode.findFirst({
+      where: {
+        phone: normalizedPhone,
+        used: false,
+        expiresAt: { gt: new Date() }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    if (!otp) {
+      return res.status(400).json({ error: 'Code expired or not found. Request a new one.' });
+    }
+
+    if (otp.code !== code) {
+      return res.status(400).json({ error: 'Incorrect code' });
+    }
+
+    // Mark OTP as used
+    await req.prisma.otpCode.update({
+      where: { id: otp.id },
+      data: { used: true }
+    });
+
+    // Find or create user
+    let user = await req.prisma.user.findUnique({ where: { phone: normalizedPhone } });
+
+    if (!user) {
+      user = await req.prisma.user.create({
+        data: {
+          phone: normalizedPhone,
+          name: name?.trim() || '',
+          isPhoneVerified: true
+        }
       });
     }
-    // ─────────────────────────────────────────────────────────────────────────
 
-    const user = await req.prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    const valid = await bcrypt.compare(password, user.passwordHash);
-    if (!valid) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+    if (user.isBanned) {
+      return res.status(403).json({ error: 'Your account has been suspended.' });
     }
 
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role, restaurantId: user.restaurantId },
+      { id: user.id, phone: user.phone, role: user.role, restaurantId: user.restaurantId },
       JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '30d' }
     );
 
     res.json({
       token,
-      user: { 
-        id: user.id, name: user.name, email: user.email, role: user.role, restaurantId: user.restaurantId,
-        isPhoneVerified: user.isPhoneVerified, trustScore: user.trustScore, isBanned: user.isBanned
+      user: {
+        id: user.id,
+        name: user.name,
+        phone: user.phone,
+        email: user.email,
+        role: user.role,
+        restaurantId: user.restaurantId,
+        isPhoneVerified: user.isPhoneVerified,
+        trustScore: user.trustScore,
+        isBanned: user.isBanned
       }
     });
   } catch (err) {
-    console.error('Login error:', err);
-    res.status(500).json({ error: 'Login failed' });
+    console.error('Verify OTP error:', err);
+    res.status(500).json({ error: 'Verification failed' });
   }
 });
 
-// GET /api/auth/me
+// ── POST /api/auth/ceo-login ──────────────────────────────────────────────────
+// CEO uses a secret passphrase — no phone / no DB lookup needed.
+router.post('/ceo-login', (req, res) => {
+  const { passphrase } = req.body;
+
+  if (!passphrase || passphrase !== CEO_SECRET) {
+    return res.status(401).json({ error: 'Invalid passphrase' });
+  }
+
+  const token = jwt.sign(
+    { id: 0, phone: 'ceo', role: 'ceo', restaurantId: null },
+    JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+
+  res.json({
+    token,
+    user: { id: 0, name: 'CEO', phone: 'ceo', role: 'ceo', restaurantId: null }
+  });
+});
+
+// ── GET /api/auth/me ──────────────────────────────────────────────────────────
 router.get('/me', authenticate, async (req, res) => {
   try {
-    // CEO has no DB record (id = 0)
     if (req.user.role === 'ceo') {
-      return res.json({ id: 0, name: 'CEO', email: CEO_EMAIL, role: 'ceo', restaurantId: null });
+      return res.json({ id: 0, name: 'CEO', phone: 'ceo', role: 'ceo', restaurantId: null });
     }
 
     const user = await req.prisma.user.findUnique({
       where: { id: req.user.id },
-      select: { 
-        id: true, name: true, email: true, phone: true, role: true, restaurantId: true,
-        isPhoneVerified: true, trustScore: true, isBanned: true 
+      select: {
+        id: true, name: true, phone: true, email: true, role: true, restaurantId: true,
+        isPhoneVerified: true, trustScore: true, isBanned: true
       }
     });
+
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json(user);
   } catch (err) {
@@ -130,32 +167,28 @@ router.get('/me', authenticate, async (req, res) => {
   }
 });
 
-// PUT /api/auth/profile
+// ── PUT /api/auth/profile ─────────────────────────────────────────────────────
 router.put('/profile', authenticate, async (req, res) => {
   try {
-    const { name, phone } = req.body;
-    
-    // CEO mock update (doesn't persist to DB, but returns success)
+    const { name, email } = req.body;
+
     if (req.user.role === 'ceo') {
-      return res.json({ id: 0, name: name || 'CEO', phone: phone || '', email: CEO_EMAIL, role: 'ceo', restaurantId: null });
+      return res.json({ id: 0, name: name || 'CEO', phone: 'ceo', role: 'ceo', restaurantId: null });
     }
 
     const data = {};
     if (name !== undefined) data.name = name;
-    if (phone !== undefined) {
-      data.phone = phone || null;
-      data.isPhoneVerified = Boolean(phone?.trim());
-    }
+    if (email !== undefined) data.email = email || null;
 
     const user = await req.prisma.user.update({
       where: { id: req.user.id },
       data,
-      select: { 
-        id: true, name: true, email: true, phone: true, role: true, restaurantId: true,
-        isPhoneVerified: true, trustScore: true, isBanned: true 
+      select: {
+        id: true, name: true, phone: true, email: true, role: true, restaurantId: true,
+        isPhoneVerified: true, trustScore: true, isBanned: true
       }
     });
-    
+
     res.json(user);
   } catch (err) {
     console.error('Update profile error:', err);

@@ -1,14 +1,9 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 Seeding database...');
-
-  // --- Create admin and customer users ---
-  const adminHash = await bcrypt.hash('admin123', 10);
-  const customerHash = await bcrypt.hash('user123', 10);
 
   // --- Create 4 Restaurants in Karshi, Uzbekistan ---
   const restaurants = await Promise.all([
@@ -155,33 +150,33 @@ async function main() {
   }
   console.log('✅ Created menu items for all restaurants');
 
-  // --- Create users ---
+  // --- Create test users (phone-based, no password) ---
   const admin = await prisma.user.create({
     data: {
       name: 'Admin User',
-      email: 'admin@example.com',
-      passwordHash: adminHash,
-      phone: '+998-75-000-0001',
+      phone: '+998750000001',
       role: 'admin',
-      restaurantId: restaurants[0].id // Linked to Evos initially
+      restaurantId: restaurants[0].id
     }
   });
 
   const customer = await prisma.user.create({
     data: {
       name: 'Test Customer',
-      email: 'customer@example.com',
-      passwordHash: customerHash,
-      phone: '+998-75-000-0002',
+      phone: '+998750000002',
       role: 'customer'
     }
   });
 
-  console.log('✅ Created users');
+  console.log('✅ Created test users');
   console.log('');
-  console.log('📋 Test credentials:');
-  console.log('   Admin:    admin@example.com / admin123');
-  console.log('   Customer: customer@example.com / user123');
+  console.log('📋 Test phones (use OTP to login):');
+  console.log('   Admin:    +998750000001');
+  console.log('   Customer: +998750000002');
+  console.log('   OTP code will be printed to console (mock SMS)');
+  console.log('');
+  console.log('🔑 CEO login: use the Staff Access passphrase from CEO_SECRET env var');
+  console.log('   Default: tablebook-ceo-secret-2024');
   console.log('');
   console.log('🎉 Seeding complete!');
 }

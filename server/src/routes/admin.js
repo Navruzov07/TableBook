@@ -88,7 +88,7 @@ router.get('/bookings', async (req, res) => {
     const bookings = await req.prisma.booking.findMany({
       where,
       include: {
-        user: { select: { name: true, email: true, phone: true } },
+        user: { select: { name: true, phone: true } },
         table: { select: { label: true, seatCount: true } },
         preorderItems: {
           include: { menuItem: { select: { name: true } } }

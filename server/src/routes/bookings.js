@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authenticate } from '../middleware/auth.js';
 import { validateBookingRequest } from '../middleware/bookingValidation.js';
 import { isTableAvailable, calculateEndTime } from '../utils/availability.js';
+import { sendSMS } from '../utils/sms.js';
 
 const router = Router();
 
@@ -17,7 +18,7 @@ router.post('/', authenticate, validateBookingRequest, async (req, res) => {
     // Get restaurant for booking duration
     const restaurant = await req.prisma.restaurant.findUnique({
       where: { id: restaurantId },
-      select: { defaultBookingDuration: true }
+      select: { defaultBookingDuration: true, name: true }
     });
     if (!restaurant) return res.status(404).json({ error: 'Restaurant not found' });
 
@@ -65,7 +66,6 @@ router.post('/', authenticate, validateBookingRequest, async (req, res) => {
 
       // Create pre-order items if provided
       if (preorder && preorder.length > 0) {
-        // Get menu item prices
         const menuItemIds = preorder.map(p => p.menuItemId);
         const menuItems = await tx.menuItem.findMany({
           where: { id: { in: menuItemIds } }
@@ -91,12 +91,39 @@ router.post('/', authenticate, validateBookingRequest, async (req, res) => {
       where: { id: booking.id },
       include: {
         table: { select: { label: true, seatCount: true } },
-        restaurant: { select: { name: true } },
+        restaurant: { select: { name: true, address: true } },
         preorderItems: {
           include: { menuItem: { select: { name: true } } }
         }
       }
     });
+
+    // ── Send confirmation SMS ─────────────────────────────────────────────────
+    // Get user's phone number (CEO has no DB record)
+    if (req.user.role !== 'ceo') {
+      try {
+        const user = await req.prisma.user.findUnique({
+          where: { id: req.user.id },
+          select: { phone: true, name: true }
+        });
+
+        if (user?.phone) {
+          const msg =
+            `✅ TableBook Confirmation\n` +
+            `Restaurant: ${restaurant.name}\n` +
+            `Date: ${bookingDate} at ${startTime}\n` +
+            `Table: ${fullBooking.table.label} (${guestCount} guests)\n` +
+            `Booking ID: #${booking.id}\n` +
+            `Reply to this number if you need to cancel.`;
+
+          // Fire-and-forget — don't block the response
+          sendSMS(user.phone, msg).catch(e => console.error('SMS error:', e));
+        }
+      } catch (smsErr) {
+        console.error('Failed to send confirmation SMS:', smsErr);
+      }
+    }
+    // ─────────────────────────────────────────────────────────────────────────
 
     res.status(201).json(fullBooking);
   } catch (err) {
@@ -145,7 +172,7 @@ router.get('/:id', authenticate, async (req, res) => {
     });
 
     if (!booking) return res.status(404).json({ error: 'Booking not found' });
-    if (booking.userId !== req.user.id && req.user.role !== 'admin') {
+    if (booking.userId !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'ceo') {
       return res.status(403).json({ error: 'Access denied' });
     }
 
@@ -162,7 +189,7 @@ router.patch('/:id/cancel', authenticate, async (req, res) => {
     const booking = await req.prisma.booking.findUnique({ where: { id } });
 
     if (!booking) return res.status(404).json({ error: 'Booking not found' });
-    if (booking.userId !== req.user.id && req.user.role !== 'admin') {
+    if (booking.userId !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'ceo') {
       return res.status(403).json({ error: 'Access denied' });
     }
 

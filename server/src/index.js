@@ -10,29 +10,37 @@ import ceoRoutes from './routes/ceo.js';
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3001;
+
+// ── CORS ──────────────────────────────────────────────────────────────────────
 const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173,http://127.0.0.1:5173')
   .split(',')
-  .map(origin => origin.trim());
+  .map(origin => origin.trim())
+  .filter(Boolean);
 
-// Middleware
+if (!process.env.CORS_ORIGIN) {
+  console.warn('⚠️  CORS_ORIGIN not set — only localhost origins allowed. Set it to your Vercel URL in production.');
+}
+
 app.use(cors({
   origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(new Error('Not allowed by CORS'));
+    // Allow requests with no origin (curl, Postman, server-to-server)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    console.warn(`CORS blocked: ${origin}`);
+    return callback(new Error(`Origin ${origin} not allowed by CORS`));
   },
   credentials: true
 }));
+
 app.use(express.json({ limit: '5mb' }));
 
-// Make prisma available to routes
+// ── Attach Prisma to all requests ─────────────────────────────────────────────
 app.use((req, res, next) => {
   req.prisma = prisma;
   next();
 });
 
-// Keep API data responses consistent while leaving auth token responses raw.
+// ── Consistent JSON envelope for non-auth API routes ─────────────────────────
 app.use('/api', (req, res, next) => {
   const json = res.json.bind(res);
 
@@ -57,7 +65,7 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
-// Routes
+// ── Routes ────────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/restaurants', restaurantRoutes);
 app.use('/api/bookings', bookingRoutes);
@@ -66,17 +74,20 @@ app.use('/api/ceo', ceoRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', timestamp: new Date().toISOString(), env: process.env.NODE_ENV || 'development' });
 });
 
-// Error handler
+// ── Global error handler ──────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Internal server error' });
 });
 
+// ── Start server ──────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`   CORS origins: ${allowedOrigins.join(', ')}`);
+  console.log(`   ENV: ${process.env.NODE_ENV || 'development'}`);
 });
 
 // Graceful shutdown
