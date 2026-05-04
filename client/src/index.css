@@ -833,3 +833,15 @@ textarea.input {
 @media (max-width: 480px) {
   .navbar-controls .lang-switcher { display: none; }
 }
+
+/* ============================================================
+   COMPONENT FIXES
+   ============================================================ */
+.menu-panel {
+  position: relative;
+  z-index: 50;
+}
+
+.booking-sidebar {
+  z-index: 10;
+}

@@ -5,6 +5,7 @@ import { bookingAPI } from '../../api/index.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useLang } from '../../context/LangContext.jsx';
 import { getTranslatedField } from '../../utils/translate.js';
+import { formatUZS } from '../../utils/format.js';
 import { useNavigate, Link } from 'react-router-dom';
 
 export default function BookingForm({ restaurant, table, menu, onClose, onSuccess }) {
@@ -208,9 +209,19 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
                   </div>
                 </div>
               ))}
-              <div style={{ borderTop: '1px solid var(--border)', paddingTop: 8, marginTop: 8, display: 'flex', justifyContent: 'space-between' }}>
-                <span className="text-sm" style={{ fontWeight: 600 }}>{t('booking.total')}</span>
-                <span className="text-sm" style={{ fontWeight: 700, color: 'var(--accent-light)' }}>${preorderTotal.toFixed(2)}</span>
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: 8, marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span className="text-sm" style={{ fontWeight: 600 }}>{t('booking.total')}</span>
+                  <span className="text-sm" style={{ fontWeight: 700, color: 'var(--accent-light)' }}>{formatUZS(preorderTotal)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span className="text-sm" style={{ fontWeight: 600 }}>Deposit required:</span>
+                  <span className="text-sm" style={{ fontWeight: 700, color: 'var(--accent)' }}>{formatUZS(Math.ceil(preorderTotal * 0.1))}</span>
+                </div>
+                <div className="text-xs text-muted" style={{ marginTop: 4, lineHeight: 1.5 }}>
+                  ✔ This deposit will be deducted from your final bill<br />
+                  ✔ Deposit is non-refundable
+                </div>
               </div>
             </div>
           )}
