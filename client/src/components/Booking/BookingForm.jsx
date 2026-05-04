@@ -5,7 +5,7 @@ import { bookingAPI } from '../../api/index.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useLang } from '../../context/LangContext.jsx';
 import { getTranslatedField } from '../../utils/translate.js';
-import { formatUZS } from '../../utils/format.js';
+import { formatUZS, toUZS } from '../../utils/currency.js';
 import { useNavigate, Link } from 'react-router-dom';
 
 export default function BookingForm({ restaurant, table, menu, onClose, onSuccess }) {
@@ -171,7 +171,7 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
                     }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <span className="text-sm">{item.name}</span>
-                        <span className="text-xs text-muted" style={{ marginLeft: 8 }}>${item.price.toFixed(2)}</span>
+                        <span className="text-xs text-muted" style={{ marginLeft: 8 }}>{formatUZS(toUZS(item.price))}</span>
                       </div>
                       <button type="button" onClick={() => addPreorderItem(item)}
                         style={{ background: 'var(--accent)', color: '#000', border: 'none', borderRadius: 6, padding: '3px 8px', cursor: 'pointer', fontSize: 12 }}>
@@ -201,7 +201,7 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
                       style={{ background: 'var(--border)', border: 'none', borderRadius: 4, padding: 2, cursor: 'pointer', color: 'var(--text-primary)', display: 'flex' }}>
                       <Plus size={12} />
                     </button>
-                    <span className="text-xs text-muted" style={{ width: 50, textAlign: 'right' }}>${(p.price * p.quantity).toFixed(2)}</span>
+                    <span className="text-xs text-muted" style={{ width: 80, textAlign: 'right' }}>{formatUZS(toUZS(p.price * p.quantity))}</span>
                     <button type="button" onClick={() => removePreorderItem(p.menuItemId)}
                       style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)', display: 'flex', padding: 0 }}>
                       <X size={14} />
@@ -212,11 +212,11 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
               <div style={{ borderTop: '1px solid var(--border)', paddingTop: 8, marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span className="text-sm" style={{ fontWeight: 600 }}>{t('booking.total')}</span>
-                  <span className="text-sm" style={{ fontWeight: 700, color: 'var(--accent-light)' }}>{formatUZS(preorderTotal)}</span>
+                  <span className="text-sm" style={{ fontWeight: 700, color: 'var(--accent-light)' }}>{formatUZS(toUZS(preorderTotal))}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span className="text-sm" style={{ fontWeight: 600 }}>Deposit required:</span>
-                  <span className="text-sm" style={{ fontWeight: 700, color: 'var(--accent)' }}>{formatUZS(Math.ceil(preorderTotal * 0.1))}</span>
+                  <span className="text-sm" style={{ fontWeight: 700, color: 'var(--accent)' }}>{formatUZS(toUZS(Math.ceil(preorderTotal * 0.1)))}</span>
                 </div>
                 <div className="text-xs text-muted" style={{ marginTop: 4, lineHeight: 1.5 }}>
                   ✔ This deposit will be deducted from your final bill<br />

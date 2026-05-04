@@ -4,6 +4,7 @@ import { bookingAPI } from '../api/index.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useLang } from '../context/LangContext.jsx';
 import { getTranslatedField } from '../utils/translate.js';
+import { formatUZS, toUZS } from '../utils/currency.js';
 import { Calendar, Clock, Users, MapPin, X, ShoppingBag, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -101,11 +102,11 @@ export default function MyBookingsPage() {
                   {b.preorderItems.map(p => (
                     <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: 3 }}>
                       <span>{p.menuItem?.name} × {p.quantity}</span>
-                      <span className="text-muted">${(p.unitPrice * p.quantity).toFixed(2)}</span>
+                      <span className="text-muted">{formatUZS(toUZS(p.unitPrice * p.quantity))}</span>
                     </div>
                   ))}
                   <div style={{ borderTop: '1px solid var(--border)', paddingTop: 4, marginTop: 4, fontSize: '0.8rem', fontWeight: 600, textAlign: 'right' }}>
-                    {t('myBookings.total')}: ${b.preorderItems.reduce((s, p) => s + p.unitPrice * p.quantity, 0).toFixed(2)}
+                    {t('myBookings.total')}: {formatUZS(toUZS(b.preorderItems.reduce((s, p) => s + p.unitPrice * p.quantity, 0)))}
                   </div>
                 </div>
               )}

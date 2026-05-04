@@ -1,4 +1,5 @@
 import { Star } from 'lucide-react';
+import { formatUZS, toUZS } from '../../utils/currency.js';
 
 export default function MenuList({ menu }) {
   if (!menu || Object.keys(menu).length === 0) {
@@ -47,7 +48,7 @@ export default function MenuList({ menu }) {
                       fontWeight: 700, color: 'var(--accent-light)', fontSize: '0.9rem',
                       whiteSpace: 'nowrap', marginLeft: 8
                     }}>
-                      ${item.price.toFixed(2)}
+                      {formatUZS(toUZS(item.price))}
                     </span>
                   </div>
                   {item.description && (

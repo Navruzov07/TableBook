@@ -9,6 +9,7 @@ import {
   Building2, CalendarDays, Users, X, Save, MapPin, Clock, Shield, AlertTriangle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { formatUZS, toUZS } from '../utils/currency.js';
 
 // ── Small modal wrapper ────────────────────────────────────────────────────────
 function Modal({ title, onClose, children }) {
@@ -336,7 +337,7 @@ export default function CEOPage() {
                         <div style={{ display: 'flex', gap: 12, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                           <span>🪑 {r._count?.tables ?? 0} {t('ceo.tables')}</span>
                           <span>📅 {r._count?.bookings ?? 0} {t('ceo.bookings')}</span>
-                          {r.requireDeposit && <span>💳 Deposit: ${r.depositAmount}</span>}
+                          {r.requireDeposit && <span>💳 Deposit: {formatUZS(toUZS(r.depositAmount))}</span>}
                         </div>
                       </div>
 
@@ -584,7 +585,7 @@ export default function CEOPage() {
             {depositForm.requireDeposit && (
               <>
                 <div className="input-group">
-                  <label>Deposit Amount ($)</label>
+                  <label>Deposit Amount (UZS)</label>
                   <input 
                     type="number" 
                     step="0.01" 

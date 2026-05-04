@@ -4,6 +4,7 @@ import { adminAPI, restaurantAPI } from '../api/index.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useLang } from '../context/LangContext.jsx';
 import { getTranslatedField } from '../utils/translate.js';
+import { formatUZS, toUZS } from '../utils/currency.js';
 import FloorPlanViewer from '../components/FloorPlan/FloorPlanViewer.jsx';
 import FloorPlanEditor from '../components/FloorPlan/FloorPlanEditor.jsx';
 import { Plus, Trash2, Save, Edit3, Calendar, Users, Check, X } from 'lucide-react';
@@ -246,7 +247,7 @@ export default function AdminPage() {
                 <div key={item.id} className="card" style={{ padding: 12, marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{item.name}</span>
-                    <span className="text-sm text-muted" style={{ marginLeft: 8 }}>${item.price.toFixed(2)}</span>
+                    <span className="text-sm text-muted" style={{ marginLeft: 8 }}>{formatUZS(toUZS(item.price))}</span>
                     {item.description && <p className="text-xs text-muted">{item.description}</p>}
                   </div>
                   <div style={{ display: 'flex', gap: 6 }}>

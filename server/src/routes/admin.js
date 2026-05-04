@@ -159,6 +159,10 @@ router.post('/menu', async (req, res) => {
 
 // PUT /api/admin/menu/:id — update menu item
 router.put('/menu/:id', async (req, res) => {
+  const userRole = req.user.role;
+  if (userRole !== "admin" && userRole !== "ceo") {
+    return res.status(403).json({ message: "Access denied" });
+  }
   try {
     const id = parseInt(req.params.id);
     const { name, description, price, category, imageUrl, available, sortOrder } = req.body;

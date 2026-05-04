@@ -72,6 +72,10 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/ceo', ceoRoutes);
 
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString(), env: process.env.NODE_ENV || 'development' });
