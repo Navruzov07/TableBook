@@ -15,6 +15,7 @@ const OTP_TTL_MINUTES = 5;
 
 // ── POST /api/auth/send-otp ───────────────────────────────────────────────────
 router.post('/send-otp', async (req, res) => {
+  console.log('[OTP] Route hit — body:', JSON.stringify(req.body));
   try {
     const { phone } = req.body;
 
@@ -33,14 +34,14 @@ router.post('/send-otp', async (req, res) => {
     const code = generateOTP();
     const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
 
-    // ── DEV: print OTP to server terminal so you don't need to check SMS ──────
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('\n\x1b[42m\x1b[30m ✅ OTP CODE \x1b[0m');
-      console.log(`\x1b[32m  Phone : ${normalizedPhone}\x1b[0m`);
-      console.log(`\x1b[32m  Code  : \x1b[1m${code}\x1b[0m`);
-      console.log(`\x1b[2m  Expires in ${OTP_TTL_MINUTES} min\x1b[0m\n`);
-    }
-
+    // ── Always log OTP to server terminal (visible in Render logs too) ─────────
+    console.log('');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log(`[OTP] Phone  : ${normalizedPhone}`);
+    console.log(`[OTP] Code   : ${code}`);
+    console.log(`[OTP] Expires: ${expiresAt.toISOString()}`);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('');
 
     await req.prisma.otpCode.create({
       data: { phone: normalizedPhone, code, expiresAt }
@@ -54,6 +55,7 @@ router.post('/send-otp', async (req, res) => {
     res.status(500).json({ error: 'Failed to send OTP' });
   }
 });
+
 
 // ── POST /api/auth/verify-otp ─────────────────────────────────────────────────
 router.post('/verify-otp', async (req, res) => {

@@ -8,48 +8,63 @@ import toast from 'react-hot-toast';
 // ─── OTP digit input component ────────────────────────────────────────────────
 function OtpInput({ value, onChange, disabled }) {
   const inputs = useRef([]);
-  const digits = value.split('');
+
+  // Always work from a fixed 6-slot array — never let length vary
+  const digits = Array.from({ length: 6 }, (_, i) => value[i] || '');
 
   const handleChange = (i, e) => {
+    // Strip non-digits, take only the last character typed
     const val = e.target.value.replace(/\D/g, '').slice(-1);
-    const next = digits.map((d, idx) => (idx === i ? val : d));
-    // pad to 6
-    while (next.length < 6) next.push('');
+    const next = [...digits];
+    next[i] = val;
     onChange(next.join(''));
+    // Auto-advance focus
     if (val && i < 5) inputs.current[i + 1]?.focus();
   };
 
   const handleKeyDown = (i, e) => {
-    if (e.key === 'Backspace' && !digits[i] && i > 0) {
-      inputs.current[i - 1]?.focus();
-      const next = digits.map((d, idx) => (idx === i - 1 ? '' : d));
-      onChange(next.join(''));
+    if (e.key === 'Backspace') {
+      if (digits[i]) {
+        // Clear current cell
+        const next = [...digits];
+        next[i] = '';
+        onChange(next.join(''));
+      } else if (i > 0) {
+        // Move to previous cell and clear it
+        inputs.current[i - 1]?.focus();
+        const next = [...digits];
+        next[i - 1] = '';
+        onChange(next.join(''));
+      }
     }
   };
 
   const handlePaste = (e) => {
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-    onChange(pasted.padEnd(6, ''));
-    inputs.current[Math.min(pasted.length, 5)]?.focus();
     e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    const next = Array.from({ length: 6 }, (_, i) => pasted[i] || '');
+    onChange(next.join(''));
+    inputs.current[Math.min(pasted.length, 5)]?.focus();
   };
 
   return (
     <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-      {Array.from({ length: 6 }).map((_, i) => (
+      {digits.map((digit, i) => (
         <input
           key={i}
           ref={el => (inputs.current[i] = el)}
           type="text"
           inputMode="numeric"
+          pattern="[0-9]*"
           maxLength={1}
-          value={digits[i] || ''}
+          value={digit}
           onChange={e => handleChange(i, e)}
           onKeyDown={e => handleKeyDown(i, e)}
           onPaste={handlePaste}
           disabled={disabled}
           id={`otp-digit-${i}`}
           className="otp-box"
+          autoComplete="one-time-code"
           style={{
             width: 48,
             height: 56,
@@ -57,12 +72,13 @@ function OtpInput({ value, onChange, disabled }) {
             fontSize: '1.5rem',
             fontWeight: 700,
             borderRadius: 'var(--radius-md)',
-            border: `2px solid ${digits[i] ? 'var(--accent)' : 'var(--border)'}`,
+            border: `2px solid ${digit ? 'var(--accent)' : 'var(--border)'}`,
             background: 'var(--bg-card)',
             color: 'var(--text-primary)',
             outline: 'none',
             transition: 'border-color 0.15s ease',
             fontFamily: 'inherit',
+            caretColor: 'var(--accent)',
           }}
         />
       ))}
@@ -381,8 +397,13 @@ export default function LoginPage() {
               <button
                 className="btn btn-primary btn-lg w-full"
                 type="submit"
-                disabled={loading || otp.replace(/\D/g,'').length < 6}
+                disabled={loading || otp.replace(/\D/g, '').length < 6}
                 id="verify-otp-btn"
+                style={{
+                  opacity: (!loading && otp.replace(/\D/g, '').length === 6) ? 1 : 0.45,
+                  transition: 'opacity 0.2s ease, transform 0.2s ease',
+                  cursor: (!loading && otp.replace(/\D/g, '').length === 6) ? 'pointer' : 'not-allowed',
+                }}
               >
                 {loading ? 'Verifying...' : 'Verify Code'}
                 {!loading && <ArrowRight size={16} />}
