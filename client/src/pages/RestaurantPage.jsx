@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { restaurantAPI } from '../api/index.js';
+import { useAuth } from '../context/AuthContext.jsx';
 import { useLang } from '../context/LangContext.jsx';
 import { getTranslatedField } from '../utils/translate.js';
 import FloorPlanViewer from '../components/FloorPlan/FloorPlanViewer.jsx';
@@ -11,12 +12,14 @@ import toast from 'react-hot-toast';
 
 export default function RestaurantPage() {
   const { id } = useParams();
+  const { user } = useAuth();
+  const isCustomer = !user || user.role === 'customer';
   const { t, lang } = useLang();
   const [restaurant, setRestaurant] = useState(null);
   const [menu, setMenu] = useState(null);
   const [availability, setAvailability] = useState(null);
   const [selectedTable, setSelectedTable] = useState(null);
-  const [activeTab, setActiveTab] = useState('book');
+  const [activeTab, setActiveTab] = useState(isCustomer ? 'book' : 'menu');
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [checkDate, setCheckDate] = useState(new Date().toISOString().split('T')[0]);
@@ -105,9 +108,11 @@ export default function RestaurantPage() {
 
       {/* Tabs */}
       <div className="tabs" style={{ marginBottom: 20, display: 'inline-flex' }}>
-        <button className={`tab ${activeTab === 'book' ? 'active' : ''}`} onClick={() => setActiveTab('book')}>
-          🪑 {t('restaurant.bookTab')}
-        </button>
+        {isCustomer && (
+          <button className={`tab ${activeTab === 'book' ? 'active' : ''}`} onClick={() => setActiveTab('book')}>
+            🪑 {t('restaurant.bookTab')}
+          </button>
+        )}
         <button className={`tab ${activeTab === 'menu' ? 'active' : ''}`} onClick={() => setActiveTab('menu')}>
           📋 {t('restaurant.menuTab')}
         </button>

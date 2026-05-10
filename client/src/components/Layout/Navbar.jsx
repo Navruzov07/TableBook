@@ -27,10 +27,12 @@ export default function Navbar() {
 
         {/* Nav links */}
         <div className="navbar-links">
-          <Link to="/" className={isActive('/')}>
-            <MapPin size={15} style={{ verticalAlign: 'middle', marginRight: 4 }} />
-            <span>{t('nav.explore')}</span>
-          </Link>
+          {(!user || user.role === 'customer') && (
+            <Link to="/" className={isActive('/')}>
+              <MapPin size={15} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+              <span>{t('nav.explore')}</span>
+            </Link>
+          )}
 
           {isAuthenticated && !isCEO && (
             <Link to="/my-bookings" className={isActive('/my-bookings')}>

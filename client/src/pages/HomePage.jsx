@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap, CircleMarker } from 'react-leaflet';
 import L from 'leaflet';
 import { restaurantAPI } from '../api/index.js';
+import { useAuth } from '../context/AuthContext.jsx';
 import { useLang } from '../context/LangContext.jsx';
 import { getTranslatedField } from '../utils/translate.js';
 import { Star, MapPin, Clock, ChevronRight, Search, Navigation } from 'lucide-react';
@@ -44,7 +45,7 @@ function FlyToUser({ coords }) {
   useEffect(() => {
     if (coords && !didFly.current) {
       didFly.current = true;
-      map.flyTo(coords, 15, { duration: 1.5 });
+      map.setView(coords, 15);
     }
   }, [coords, map]);
   return null;
@@ -57,6 +58,7 @@ export default function HomePage() {
   const [hoveredId, setHoveredId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userPosition, setUserPosition] = useState(null);
+  const { user } = useAuth();
   const { t, lang } = useLang();
   const navigate = useNavigate();
 
@@ -195,12 +197,14 @@ export default function HomePage() {
                     <strong style={{ fontSize: 14 }}>{getTranslatedField(r.name, lang)}</strong><br />
                     <span style={{ color: '#f59e0b', fontWeight: 700 }}>⭐ {r.rating}/10</span><br />
                     <span style={{ fontSize: 12, color: '#666' }}>{r.cuisineType}</span><br />
-                    <button
-                      onClick={() => navigate(`/restaurant/${r.id}`)}
-                      style={{ marginTop: 6, padding: '4px 12px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
-                    >
-                      {t('home.reserve')} <ChevronRight size={12} style={{ verticalAlign: 'middle' }} />
-                    </button>
+                    {(!user || user.role === 'customer') && (
+                      <button
+                        onClick={() => navigate(`/restaurant/${r.id}`)}
+                        style={{ marginTop: 6, padding: '4px 12px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
+                      >
+                        {t('home.reserve')} <ChevronRight size={12} style={{ verticalAlign: 'middle' }} />
+                      </button>
+                    )}
                   </div>
                 </Popup>
               </Marker>

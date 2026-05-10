@@ -267,13 +267,15 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
           </label>
         </div>
 
-        <button 
-          className="btn btn-primary btn-lg w-full" 
-          disabled={loading || !termsAccepted || (isAuthenticated && !user?.isPhoneVerified)} 
-          type="submit"
-        >
-          {loading ? t('common.loading') : t('booking.bookingTitle')}
-        </button>
+        {(!user || user.role === 'customer') && (
+          <button 
+            className="btn btn-primary btn-lg w-full" 
+            disabled={loading || !termsAccepted || (isAuthenticated && !user?.isPhoneVerified)} 
+            type="submit"
+          >
+            {loading ? t('common.loading') : t('booking.bookingTitle')}
+          </button>
+        )}
       </form>
     </div>
   );

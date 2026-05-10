@@ -15,7 +15,7 @@ const OTP_TTL_MINUTES = 5;
 
 // ── POST /api/auth/send-otp ───────────────────────────────────────────────────
 router.post('/send-otp', async (req, res) => {
-  console.log('[OTP] Route hit — body:', JSON.stringify(req.body));
+  console.log('send-otp body:', req.body);
   try {
     const { phone } = req.body;
 
@@ -32,6 +32,7 @@ router.post('/send-otp', async (req, res) => {
     });
 
     const code = generateOTP();
+    console.log('Generated OTP:', code);
     const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
 
     // ── Always log OTP to server terminal (visible in Render logs too) ─────────
@@ -59,7 +60,7 @@ router.post('/send-otp', async (req, res) => {
 
 // ── POST /api/auth/verify-otp ─────────────────────────────────────────────────
 router.post('/verify-otp', async (req, res) => {
-  console.log('[VERIFY OTP] Route hit — body:', req.body);
+  console.log('verify-otp body:', req.body);
   try {
     const { phone, code, name } = req.body;
 
