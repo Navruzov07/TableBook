@@ -161,7 +161,7 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
               {(!isAuthenticated || (isAuthenticated && user?.trustScore < 50)) && (
                 <div style={{ padding: '8px 12px', marginBottom: 8, background: 'var(--warning-bg)', color: 'var(--warning)', borderRadius: 8, fontSize: '0.82rem', textAlign: 'center' }}>
                   {!isAuthenticated
-                    ? '🔒 Login to add items to your pre-order'
+                    ? t('booking.loginToAdd')
                     : `⚠️ ${t('booking.trustScoreLow').replace('{score}', user.trustScore)}`
                   }
                 </div>
@@ -228,12 +228,12 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
                   <span className="text-sm" style={{ fontWeight: 700, color: 'var(--accent-light)' }}>{formatUZS(toUZS(preorderTotal))}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span className="text-sm" style={{ fontWeight: 600 }}>Deposit required:</span>
+                  <span className="text-sm" style={{ fontWeight: 600 }}>{t('booking.depositRequired')}</span>
                   <span className="text-sm" style={{ fontWeight: 700, color: 'var(--accent)' }}>{formatUZS(toUZS(Math.ceil(preorderTotal * 0.1)))}</span>
                 </div>
                 <div className="text-xs text-muted" style={{ marginTop: 4, lineHeight: 1.5 }}>
-                  ✔ This deposit will be deducted from your final bill<br />
-                  ✔ Deposit is non-refundable
+                  {t('booking.depositDeducted')}<br />
+                  {t('booking.depositNonRefundable')}
                 </div>
               </div>
             </div>

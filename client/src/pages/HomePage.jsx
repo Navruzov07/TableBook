@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, CircleMarker } from 'react-leaflet';
 import L from 'leaflet';
 import { restaurantAPI } from '../api/index.js';
 import { useLang } from '../context/LangContext.jsx';
@@ -27,20 +27,7 @@ const createIcon = (rating) => {
   });
 };
 
-// Blue pulsing dot for user's GPS position
-const userLocationIcon = L.divIcon({
-  className: 'user-location-marker',
-  html: `<div style="
-    width: 18px; height: 18px;
-    background: #3b82f6;
-    border-radius: 50%;
-    border: 3px solid white;
-    box-shadow: 0 0 0 4px rgba(59,130,246,0.35), 0 2px 8px rgba(0,0,0,0.4);
-    animation: userPulse 2s ease-in-out infinite;
-  "></div>`,
-  iconSize: [18, 18],
-  iconAnchor: [9, 9],
-});
+// The pulsing animation is now applied via CSS to the CircleMarker path
 
 function FlyToRestaurant({ coords }) {
   const map = useMap();
@@ -79,7 +66,7 @@ export default function HomePage() {
       setLoading(false);
     }).catch(() => {
       setLoading(false);
-      toast.error('Could not load restaurants. Please try again.');
+      toast.error(t('home.loadError') || 'Could not load restaurants. Please try again.');
     });
   }, []);
 
@@ -219,16 +206,21 @@ export default function HomePage() {
               </Marker>
             ))}
 
-            {/* GPS: user location blue dot */}
+            {/* GPS: user location blue dot using CircleMarker */}
             {userPosition && (
-              <Marker position={userPosition} icon={userLocationIcon}>
+              <CircleMarker
+                center={userPosition}
+                radius={8}
+                pathOptions={{ color: 'white', weight: 2, fillColor: '#3b82f6', fillOpacity: 1 }}
+                className="gps-pulse-marker"
+              >
                 <Popup>
                   <div style={{ fontFamily: 'Outfit, sans-serif', textAlign: 'center' }}>
                     <Navigation size={14} style={{ color: '#3b82f6', verticalAlign: 'middle', marginRight: 4 }} />
-                    <strong style={{ fontSize: 13 }}>Your location</strong>
+                    <strong style={{ fontSize: 13 }}>{t('home.yourLocation')}</strong>
                   </div>
                 </Popup>
-              </Marker>
+              </CircleMarker>
             )}
 
             <FlyToRestaurant coords={flyTo} />
@@ -238,13 +230,15 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Keyframe for blue dot pulse animation */}
+      {/* Keyframe for blue dot pulse animation on SVG paths */}
       <style>{`
-        @keyframes userPulse {
-          0%, 100% { box-shadow: 0 0 0 4px rgba(59,130,246,0.35), 0 2px 8px rgba(0,0,0,0.4); }
-          50%       { box-shadow: 0 0 0 8px rgba(59,130,246,0.15), 0 2px 8px rgba(0,0,0,0.4); }
+        @keyframes gpsPulse {
+          0% { stroke-width: 2; stroke-opacity: 1; }
+          100% { stroke-width: 15; stroke-opacity: 0; }
         }
-        .user-location-marker { background: transparent !important; border: none !important; }
+        .gps-pulse-marker {
+          animation: gpsPulse 2s ease-out infinite;
+        }
       `}</style>
     </div>
   );

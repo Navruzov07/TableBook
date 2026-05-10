@@ -59,6 +59,7 @@ router.post('/send-otp', async (req, res) => {
 
 // ── POST /api/auth/verify-otp ─────────────────────────────────────────────────
 router.post('/verify-otp', async (req, res) => {
+  console.log('[VERIFY OTP] Route hit — body:', req.body);
   try {
     const { phone, code, name } = req.body;
 

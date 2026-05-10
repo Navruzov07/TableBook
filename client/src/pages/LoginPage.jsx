@@ -150,7 +150,7 @@ export default function LoginPage() {
     e.preventDefault();
     const cleaned = phone.replace(/[\s\-()]/g, '');
     if (!cleaned || cleaned.length < 8) {
-      return toast.error('Enter a valid phone number');
+      return toast.error(t('login.invalidPhone') || 'Enter a valid phone number');
     }
     setLoading(true);
     try {
@@ -159,9 +159,9 @@ export default function LoginPage() {
       setExpired(false);
       setOtp('');
       setStep('otp');
-      toast.success('OTP sent! Check your phone (or server console in dev mode)');
+      toast.success(t('login.otpSent') || 'OTP sent! Check your phone');
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to send OTP');
+      toast.error(err.response?.data?.error || t('login.failedSendOtp') || 'Failed to send OTP');
     } finally {
       setLoading(false);
     }
@@ -171,7 +171,7 @@ export default function LoginPage() {
   const handleVerifyOtp = async (e) => {
     e?.preventDefault();
     const code = otp.replace(/\D/g, '');
-    if (code.length !== 6) return toast.error('Enter the full 6-digit code');
+    if (code.length !== 6) return toast.error(t('login.enterFullCode') || 'Enter the full 6-digit code');
 
     setLoading(true);
     try {
@@ -248,7 +248,7 @@ export default function LoginPage() {
       toast.success('Welcome, CEO 👑');
       navigate('/ceo');
     } catch {
-      toast.error('Incorrect passphrase');
+      toast.error(t('login.incorrectPassphrase') || 'Incorrect passphrase');
     } finally {
       setStaffLoading(false);
     }
@@ -285,20 +285,20 @@ export default function LoginPage() {
             🍽
           </div>
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: 4 }}>TableBook</h1>
-          <p className="text-muted text-sm">Reserve your perfect table</p>
+          <p className="text-muted text-sm">{t('login.reservePerfect')}</p>
         </div>
 
         {/* ── Step: Phone ── */}
         {step === 'phone' && (
           <div className="card animate-slide-up" style={{ padding: 32 }}>
-            <h2 style={{ marginBottom: 6, fontSize: '1.25rem' }}>Sign in with phone</h2>
+            <h2 style={{ marginBottom: 6, fontSize: '1.25rem' }}>{t('login.signInWithPhone')}</h2>
             <p className="text-muted text-sm" style={{ marginBottom: 24 }}>
-              Enter your number — we'll send a one-time code
+              {t('login.enterNumber')}
             </p>
 
             <form onSubmit={handleSendOtp} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div className="input-group">
-                <label>Phone number</label>
+                <label>{t('login.phoneNumber')}</label>
                 <div style={{ position: 'relative' }}>
                   <Phone size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                   <input
@@ -321,7 +321,7 @@ export default function LoginPage() {
                 disabled={loading}
                 id="send-otp-btn"
               >
-                {loading ? 'Sending...' : 'Send Code'}
+                {loading ? t('login.sending') : t('login.sendCode')}
                 {!loading && <ArrowRight size={16} />}
               </button>
             </form>
@@ -341,7 +341,7 @@ export default function LoginPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                   <Shield size={14} style={{ color: 'var(--accent)' }} />
                   <span className="text-xs" style={{ fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                    Staff Access
+                    {t('login.staffAccess')}
                   </span>
                 </div>
                 <form onSubmit={handleStaffLogin} style={{ display: 'flex', gap: 8 }}>
@@ -352,7 +352,7 @@ export default function LoginPage() {
                       className="input w-full"
                       style={{ paddingLeft: 30, fontSize: '0.875rem' }}
                       type="password"
-                      placeholder="Passphrase"
+                      placeholder={t('login.passphrase')}
                       value={passphrase}
                       onChange={e => setPassphrase(e.target.value)}
                       autoComplete="off"
@@ -380,15 +380,15 @@ export default function LoginPage() {
               onClick={() => { setStep('phone'); setOtp(''); }}
               style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.875rem', padding: 0 }}
             >
-              ← Back
+              ← {t('login.back')}
             </button>
 
-            <h2 style={{ marginBottom: 6, fontSize: '1.25rem' }}>Enter your code</h2>
+            <h2 style={{ marginBottom: 6, fontSize: '1.25rem' }}>{t('login.enterCode')}</h2>
             <p className="text-muted text-sm" style={{ marginBottom: 8 }}>
-              Sent to <strong style={{ color: 'var(--text-primary)' }}>{phone}</strong>
+              {t('login.sentTo')} <strong style={{ color: 'var(--text-primary)' }}>{phone}</strong>
             </p>
             <p className="text-xs text-muted" style={{ marginBottom: 24 }}>
-              (In development: check your <strong>server console</strong> for the code)
+              {t('login.devHint')}
             </p>
 
             <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'center' }}>
@@ -405,13 +405,13 @@ export default function LoginPage() {
                   cursor: (!loading && otp.replace(/\D/g, '').length === 6) ? 'pointer' : 'not-allowed',
                 }}
               >
-                {loading ? 'Verifying...' : 'Verify Code'}
+                {loading ? t('login.verifying') : t('login.verifyCode')}
                 {!loading && <ArrowRight size={16} />}
               </button>
             </form>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 20 }}>
-              <span className="text-xs text-muted">Code expires in</span>
+              <span className="text-xs text-muted">{t('login.codeExpiresIn')}</span>
               {!expired
                 ? <Countdown seconds={ttl} onExpire={() => setExpired(true)} />
                 : (
@@ -422,7 +422,7 @@ export default function LoginPage() {
                       disabled={loading}
                       id="resend-otp-btn"
                     >
-                      <RotateCcw size={12} /> Resend code
+                      <RotateCcw size={12} /> {t('login.resendCode')}
                     </button>
                   )
               }
@@ -430,7 +430,7 @@ export default function LoginPage() {
 
             {expired && (
               <p className="text-xs text-center mt-2" style={{ color: 'var(--danger, #ef4444)' }}>
-                Code expired. Please request a new one.
+                {t('login.codeExpired')}
               </p>
             )}
           </div>
@@ -441,20 +441,20 @@ export default function LoginPage() {
           <div className="card animate-slide-up" style={{ padding: 32 }}>
             <div style={{ textAlign: 'center', marginBottom: 20 }}>
               <div style={{ fontSize: 36, marginBottom: 8 }}>👋</div>
-              <h2 style={{ fontSize: '1.25rem', marginBottom: 4 }}>Welcome!</h2>
-              <p className="text-muted text-sm">You're new here. What should we call you?</p>
+              <h2 style={{ fontSize: '1.25rem', marginBottom: 4 }}>{t('login.welcomeNew')}</h2>
+              <p className="text-muted text-sm">{t('login.whatShouldWeCallYou')}</p>
             </div>
 
             <form onSubmit={handleSaveName} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div className="input-group">
-                <label>Your name</label>
+                <label>{t('login.yourName')}</label>
                 <div style={{ position: 'relative' }}>
                   <User size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                   <input
                     id="name-input"
                     className="input w-full"
                     style={{ paddingLeft: 36 }}
-                    placeholder="Full name"
+                    placeholder={t('login.fullName')}
                     value={name}
                     onChange={e => setName(e.target.value)}
                     autoFocus
@@ -469,7 +469,7 @@ export default function LoginPage() {
                 disabled={loading || !name.trim()}
                 id="save-name-btn"
               >
-                {loading ? 'Saving...' : "Let's Go 🚀"}
+                {loading ? t('login.saving') : t('login.letsGo')}
               </button>
 
               <button
@@ -477,7 +477,7 @@ export default function LoginPage() {
                 onClick={() => navigate('/')}
                 style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.875rem' }}
               >
-                Skip for now
+                {t('login.skipForNow')}
               </button>
             </form>
           </div>
