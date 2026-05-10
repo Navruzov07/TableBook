@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { restaurantAPI } from '../api/index.js';
 import { useLang } from '../context/LangContext.jsx';
 import { getTranslatedField } from '../utils/translate.js';
-import { Star, MapPin, Clock, ChevronRight, Search } from 'lucide-react';
+import { Star, MapPin, Clock, ChevronRight, Search, Navigation } from 'lucide-react';
+import toast from 'react-hot-toast';
 import 'leaflet/dist/leaflet.css';
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -26,10 +27,38 @@ const createIcon = (rating) => {
   });
 };
 
+// Blue pulsing dot for user's GPS position
+const userLocationIcon = L.divIcon({
+  className: 'user-location-marker',
+  html: `<div style="
+    width: 18px; height: 18px;
+    background: #3b82f6;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 0 4px rgba(59,130,246,0.35), 0 2px 8px rgba(0,0,0,0.4);
+    animation: userPulse 2s ease-in-out infinite;
+  "></div>`,
+  iconSize: [18, 18],
+  iconAnchor: [9, 9],
+});
+
 function FlyToRestaurant({ coords }) {
   const map = useMap();
   useEffect(() => {
     if (coords) map.flyTo(coords, 16, { duration: 1 });
+  }, [coords, map]);
+  return null;
+}
+
+// Flies to user position once on mount, then stops
+function FlyToUser({ coords }) {
+  const map = useMap();
+  const didFly = useRef(false);
+  useEffect(() => {
+    if (coords && !didFly.current) {
+      didFly.current = true;
+      map.flyTo(coords, 15, { duration: 1.5 });
+    }
   }, [coords, map]);
   return null;
 }
@@ -40,6 +69,7 @@ export default function HomePage() {
   const [flyTo, setFlyTo] = useState(null);
   const [hoveredId, setHoveredId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [userPosition, setUserPosition] = useState(null);
   const { t, lang } = useLang();
   const navigate = useNavigate();
 
@@ -47,7 +77,22 @@ export default function HomePage() {
     restaurantAPI.list().then(res => {
       setRestaurants(Array.isArray(res.data) ? res.data : []);
       setLoading(false);
-    }).catch(() => setLoading(false));
+    }).catch(() => {
+      setLoading(false);
+      toast.error('Could not load restaurants. Please try again.');
+    });
+  }, []);
+
+  // Request GPS position — silently ignore if denied
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserPosition([pos.coords.latitude, pos.coords.longitude]);
+      },
+      () => { /* permission denied or error — do nothing */ },
+      { timeout: 8000, maximumAge: 60000 }
+    );
   }, []);
 
   const filtered = restaurants.filter(r => {
@@ -57,10 +102,13 @@ export default function HomePage() {
            cuisine.toLowerCase().includes(search.toLowerCase());
   });
 
-  const center = restaurants.length > 0
-    ? [restaurants.reduce((s, r) => s + r.lat, 0) / restaurants.length,
-       restaurants.reduce((s, r) => s + r.lng, 0) / restaurants.length]
-    : [41.9028, 12.4964];
+  const center = userPosition
+    ? userPosition
+    : restaurants.length > 0
+      ? [restaurants.reduce((s, r) => s + r.lat, 0) / restaurants.length,
+         restaurants.reduce((s, r) => s + r.lng, 0) / restaurants.length]
+      : [41.9028, 12.4964];
+
 
   return (
     <div className="container" style={{ paddingTop: 16 }}>
@@ -170,10 +218,35 @@ export default function HomePage() {
                 </Popup>
               </Marker>
             ))}
+
+            {/* GPS: user location blue dot */}
+            {userPosition && (
+              <Marker position={userPosition} icon={userLocationIcon}>
+                <Popup>
+                  <div style={{ fontFamily: 'Outfit, sans-serif', textAlign: 'center' }}>
+                    <Navigation size={14} style={{ color: '#3b82f6', verticalAlign: 'middle', marginRight: 4 }} />
+                    <strong style={{ fontSize: 13 }}>Your location</strong>
+                  </div>
+                </Popup>
+              </Marker>
+            )}
+
             <FlyToRestaurant coords={flyTo} />
+            {/* Fly to user's GPS position once on first load */}
+            <FlyToUser coords={userPosition} />
           </MapContainer>
         </div>
       </div>
+
+      {/* Keyframe for blue dot pulse animation */}
+      <style>{`
+        @keyframes userPulse {
+          0%, 100% { box-shadow: 0 0 0 4px rgba(59,130,246,0.35), 0 2px 8px rgba(0,0,0,0.4); }
+          50%       { box-shadow: 0 0 0 8px rgba(59,130,246,0.15), 0 2px 8px rgba(0,0,0,0.4); }
+        }
+        .user-location-marker { background: transparent !important; border: none !important; }
+      `}</style>
     </div>
   );
 }
+

@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
@@ -15,7 +16,26 @@ import CEOProfilePage from './pages/CEOProfilePage.jsx';
 import TermsPage from './pages/TermsPage.jsx';
 import './index.css';
 
+// ── Keep Render backend alive (free tier sleeps after 15 min inactivity) ───────
+const KEEP_ALIVE_INTERVAL_MS = 12 * 60 * 1000; // 12 minutes
+const HEALTH_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '') + '/api/health';
+
+function useKeepAlive() {
+  useEffect(() => {
+    const ping = () => {
+      fetch(HEALTH_URL, { method: 'GET', cache: 'no-cache' })
+        .catch(() => { /* silence — backend may not be up yet */ });
+    };
+    // Initial ping on mount
+    ping();
+    const id = setInterval(ping, KEEP_ALIVE_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, []);
+}
+
 export default function App() {
+  useKeepAlive();
+
   return (
     <ThemeProvider>
       <LangProvider>
@@ -53,3 +73,4 @@ export default function App() {
     </ThemeProvider>
   );
 }
+

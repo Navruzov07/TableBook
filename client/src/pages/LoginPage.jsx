@@ -49,6 +49,7 @@ function OtpInput({ value, onChange, disabled }) {
           onPaste={handlePaste}
           disabled={disabled}
           id={`otp-digit-${i}`}
+          className="otp-box"
           style={{
             width: 48,
             height: 56,

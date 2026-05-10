@@ -90,7 +90,7 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
   };
 
   return (
-    <div className="card animate-slide-up" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
+    <div className="card animate-slide-up" style={{ maxHeight: '90vh', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div>
           <h3>{t('booking.title')} - {table?.label}</h3>
@@ -103,8 +103,8 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
         )}
       </div>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14, flex: 1, minHeight: 0 }}>
+        <div className="booking-date-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <div className="input-group">
             <label><Calendar size={12} style={{ verticalAlign: 'middle' }} /> {t('booking.date')}</label>
             <input type="date" className="input" value={form.bookingDate} onChange={update('bookingDate')} min={today} required />
@@ -138,11 +138,8 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
 
         {/* Pre-order Section */}
         <div>
-          {isAuthenticated && user?.trustScore < 50 ? (
-            <div style={{ padding: 12, background: 'rgba(255, 60, 60, 0.1)', color: 'var(--danger)', borderRadius: 8, fontSize: '0.85rem' }}>
-              {t('booking.trustScoreLow').replace('{score}', user.trustScore)}
-            </div>
-          ) : (
+          {/* Toggle button — always visible when menu exists */}
+          {menu && (
             <button
               type="button"
               className="btn btn-secondary w-full"
@@ -157,28 +154,44 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
             </button>
           )}
 
-          {showPreorder && menu && isAuthenticated && user?.trustScore >= 50 && (
-            <div style={{ marginTop: 10, maxHeight: 250, overflowY: 'auto', padding: 4 }}>
+          {/* Menu list — always rendered when toggled open and menu exists */}
+          {showPreorder && menu && (
+            <div style={{ marginTop: 10, maxHeight: 280, overflowY: 'auto', padding: 4, border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', background: 'var(--bg-glass)' }}>
+              {/* Show notice for users who can't pre-order */}
+              {(!isAuthenticated || (isAuthenticated && user?.trustScore < 50)) && (
+                <div style={{ padding: '8px 12px', marginBottom: 8, background: 'var(--warning-bg)', color: 'var(--warning)', borderRadius: 8, fontSize: '0.82rem', textAlign: 'center' }}>
+                  {!isAuthenticated
+                    ? '🔒 Login to add items to your pre-order'
+                    : `⚠️ ${t('booking.trustScoreLow').replace('{score}', user.trustScore)}`
+                  }
+                </div>
+              )}
+
               {Object.entries(menu).map(([category, items]) => (
-                <div key={category} style={{ marginBottom: 12 }}>
-                  <p className="text-xs text-muted" style={{ fontWeight: 600, textTransform: 'uppercase', marginBottom: 6, letterSpacing: '0.05em' }}>
+                <div key={category} style={{ marginBottom: 12, padding: '0 8px' }}>
+                  <p className="text-xs text-muted" style={{ fontWeight: 600, textTransform: 'uppercase', marginBottom: 6, letterSpacing: '0.05em', paddingTop: 4 }}>
                     {category}
                   </p>
-                  {items.map(item => (
-                    <div key={item.id} style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '6px 0', borderBottom: '1px solid var(--border)'
-                    }}>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <span className="text-sm">{item.name}</span>
-                        <span className="text-xs text-muted" style={{ marginLeft: 8 }}>{formatUZS(toUZS(item.price))}</span>
+                  {items.map(item => {
+                    const canAdd = isAuthenticated && user?.trustScore >= 50;
+                    return (
+                      <div key={item.id} style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '6px 0', borderBottom: '1px solid var(--border)'
+                      }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <span className="text-sm">{item.name}</span>
+                          <span className="text-xs text-muted" style={{ marginLeft: 8 }}>{formatUZS(toUZS(item.price))}</span>
+                        </div>
+                        {canAdd && (
+                          <button type="button" onClick={() => addPreorderItem(item)}
+                            style={{ background: 'var(--accent)', color: '#000', border: 'none', borderRadius: 6, padding: '3px 8px', cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center' }}>
+                            <Plus size={12} />
+                          </button>
+                        )}
                       </div>
-                      <button type="button" onClick={() => addPreorderItem(item)}
-                        style={{ background: 'var(--accent)', color: '#000', border: 'none', borderRadius: 6, padding: '3px 8px', cursor: 'pointer', fontSize: 12 }}>
-                        <Plus size={12} />
-                      </button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ))}
             </div>

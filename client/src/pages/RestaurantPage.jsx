@@ -6,7 +6,8 @@ import { getTranslatedField } from '../utils/translate.js';
 import FloorPlanViewer from '../components/FloorPlan/FloorPlanViewer.jsx';
 import BookingForm from '../components/Booking/BookingForm.jsx';
 import MenuList from '../components/Menu/MenuList.jsx';
-import { Star, MapPin, Clock, Phone } from 'lucide-react';
+import { Star, MapPin, Clock, Phone, AlertCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function RestaurantPage() {
   const { id } = useParams();
@@ -17,6 +18,7 @@ export default function RestaurantPage() {
   const [selectedTable, setSelectedTable] = useState(null);
   const [activeTab, setActiveTab] = useState('book');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [checkDate, setCheckDate] = useState(new Date().toISOString().split('T')[0]);
   const [checkTime, setCheckTime] = useState('19:00');
 
@@ -28,13 +30,19 @@ export default function RestaurantPage() {
       setRestaurant(resData.data);
       setMenu(menuData.data);
       setLoading(false);
-    }).catch(() => setLoading(false));
+    }).catch((err) => {
+      setLoadError(true);
+      setLoading(false);
+      toast.error(t('common.error') || 'Failed to load restaurant data');
+    });
   }, [id]);
 
   const checkAvailability = useCallback(() => {
     restaurantAPI.availability(id, checkDate, checkTime)
       .then(res => setAvailability(res.data))
-      .catch(() => {});
+      .catch((err) => {
+        toast.error(t('common.error') || 'Failed to check availability');
+      });
   }, [id, checkDate, checkTime]);
 
   useEffect(() => {
@@ -52,7 +60,12 @@ export default function RestaurantPage() {
   };
 
   if (loading) return <div className="loading-page"><div className="spinner" /></div>;
-  if (!restaurant) return <div className="container mt-3"><p className="text-muted">{t('restaurant.notFound')}</p></div>;
+  if (loadError || !restaurant) return (
+    <div className="container mt-3" style={{ textAlign: 'center', paddingTop: 60 }}>
+      <AlertCircle size={40} style={{ color: 'var(--danger)', marginBottom: 12 }} />
+      <p style={{ color: 'var(--danger)', fontWeight: 600 }}>{t('restaurant.notFound')}</p>
+    </div>
+  );
 
   const floorPlan = typeof restaurant.floorPlan === 'string' ? JSON.parse(restaurant.floorPlan) : restaurant.floorPlan;
   const containerWidth = 780;
@@ -105,7 +118,7 @@ export default function RestaurantPage() {
 
       {/* Book Tab */}
       {activeTab === 'book' && (
-        <div className="animate-fade-in" style={{ display: 'grid', gridTemplateColumns: selectedTable ? '1fr 380px' : '1fr', gap: 20 }}>
+        <div className="animate-fade-in restaurant-book-grid" style={{ display: 'grid', gridTemplateColumns: selectedTable ? '1fr 380px' : '1fr', gap: 20 }}>
           <div>
             <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
               <div className="input-group">
@@ -130,13 +143,15 @@ export default function RestaurantPage() {
               </p>
             </div>
 
-            <FloorPlanViewer
-              floorPlan={floorPlan}
-              availability={availability}
-              selectedTable={selectedTable?.id}
-              onSelectTable={handleTableSelect}
-              scale={scale}
-            />
+            <div className="floor-plan-wrapper">
+              <FloorPlanViewer
+                floorPlan={floorPlan}
+                availability={availability}
+                selectedTable={selectedTable?.id}
+                onSelectTable={handleTableSelect}
+                scale={scale}
+              />
+            </div>
 
             {!selectedTable && (
               <p className="text-muted text-sm mt-2" style={{ textAlign: 'center' }}>

@@ -33,6 +33,15 @@ router.post('/send-otp', async (req, res) => {
     const code = generateOTP();
     const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
 
+    // ── DEV: print OTP to server terminal so you don't need to check SMS ──────
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('\n\x1b[42m\x1b[30m ✅ OTP CODE \x1b[0m');
+      console.log(`\x1b[32m  Phone : ${normalizedPhone}\x1b[0m`);
+      console.log(`\x1b[32m  Code  : \x1b[1m${code}\x1b[0m`);
+      console.log(`\x1b[2m  Expires in ${OTP_TTL_MINUTES} min\x1b[0m\n`);
+    }
+
+
     await req.prisma.otpCode.create({
       data: { phone: normalizedPhone, code, expiresAt }
     });
