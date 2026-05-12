@@ -248,55 +248,40 @@ export default function LoginPage() {
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div
-      style={{
-        minHeight: '100dvh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px',
-        background: 'var(--bg-primary)'
-      }}
-    >
-      <div style={{ width: '100%', maxWidth: 420 }}>
+    <div className="min-h-[100dvh] flex items-center justify-center p-4 md:p-5 bg-[var(--bg-primary)]">
+      <div className="w-full max-w-[420px]">
 
         {/* Logo / Brand */}
         <div
-          style={{ textAlign: 'center', marginBottom: 32, cursor: 'default', userSelect: 'none' }}
+          className="text-center mb-6 md:mb-8 cursor-default select-none"
           onClick={handleLogoClick}
         >
           <div
-            style={{
-              width: 64, height: 64, borderRadius: '50%',
-              background: 'linear-gradient(135deg, var(--accent), #059669)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 28, margin: '0 auto 12px',
-              boxShadow: '0 8px 32px rgba(16,185,129,0.35)'
-            }}
+            className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center text-2xl md:text-[28px] mx-auto mb-2 md:mb-3 shadow-[0_8px_32px_rgba(16,185,129,0.35)]"
+            style={{ background: 'linear-gradient(135deg, var(--accent), #059669)' }}
           >
             🍽
           </div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: 4 }}>TableBook</h1>
-          <p className="text-muted text-sm">{t('login.reservePerfect')}</p>
+          <h1 className="text-xl md:text-[1.75rem] font-extrabold mb-1">TableBook</h1>
+          <p className="text-muted text-xs md:text-sm">{t('login.reservePerfect')}</p>
         </div>
 
         {/* ── Step: Phone ── */}
         {step === 'phone' && (
-          <div className="card animate-slide-up" style={{ padding: 32 }}>
-            <h2 style={{ marginBottom: 6, fontSize: '1.25rem' }}>{t('login.signInWithPhone')}</h2>
-            <p className="text-muted text-sm" style={{ marginBottom: 24 }}>
+          <div className="card animate-slide-up p-5 md:p-8">
+            <h2 className="mb-1.5 text-lg md:text-xl">{t('login.signInWithPhone')}</h2>
+            <p className="text-muted text-xs md:text-sm mb-4 md:mb-6">
               {t('login.enterNumber')}
             </p>
 
-            <form onSubmit={handleSendOtp} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <form onSubmit={handleSendOtp} className="flex flex-col gap-3 md:gap-4">
               <div className="input-group">
                 <label>{t('login.phoneNumber')}</label>
-                <div style={{ position: 'relative' }}>
-                  <Phone size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] w-3.5 h-3.5 md:w-4 md:h-4" />
                   <input
                     id="phone-input"
-                    className="input w-full"
-                    style={{ paddingLeft: 36 }}
+                    className="input w-full pl-8 md:pl-9 text-sm md:text-base"
                     type="tel"
                     placeholder="+998 90 000 00 00"
                     value={phone}
@@ -318,31 +303,20 @@ export default function LoginPage() {
               </button>
             </form>
 
-            {/* Staff Access — hidden, revealed by triple-clicking the logo */}
             {showStaff && (
-              <div
-                style={{
-                  marginTop: 24,
-                  padding: 16,
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--border)',
-                  background: 'rgba(255,255,255,0.03)',
-                  animation: 'fadeIn 0.3s ease'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <div className="mt-4 md:mt-6 p-3 md:p-4 rounded-[var(--radius-md)] border border-[var(--border)] bg-[rgba(255,255,255,0.03)] animate-fade-in">
+                <div className="flex items-center gap-2 mb-2 md:mb-3">
                   <Shield size={14} style={{ color: 'var(--accent)' }} />
-                  <span className="text-xs" style={{ fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  <span className="text-[10px] md:text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
                     {t('login.staffAccess')}
                   </span>
                 </div>
-                <form onSubmit={handleStaffLogin} style={{ display: 'flex', gap: 8 }}>
-                  <div style={{ position: 'relative', flex: 1 }}>
-                    <Lock size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <form onSubmit={handleStaffLogin} className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Lock className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] w-3 h-3 md:w-3.5 md:h-3.5" />
                     <input
                       id="ceo-passphrase"
-                      className="input w-full"
-                      style={{ paddingLeft: 30, fontSize: '0.875rem' }}
+                      className="input w-full pl-7 md:pl-8 text-xs md:text-sm"
                       type="password"
                       placeholder={t('login.passphrase')}
                       value={passphrase}
@@ -367,23 +341,23 @@ export default function LoginPage() {
 
         {/* ── Step: OTP ── */}
         {step === 'otp' && (
-          <div className="card animate-slide-up" style={{ padding: 32 }}>
+          <div className="card animate-slide-up p-5 md:p-8">
             <button
               onClick={() => { setStep('phone'); setOtp(''); }}
-              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.875rem', padding: 0 }}
+              className="flex items-center gap-1 bg-none border-none text-[var(--text-muted)] cursor-pointer mb-3 md:mb-4 text-xs md:text-sm p-0"
             >
               ← {t('login.back')}
             </button>
 
-            <h2 style={{ marginBottom: 6, fontSize: '1.25rem' }}>{t('login.enterCode')}</h2>
-            <p className="text-muted text-sm" style={{ marginBottom: 8 }}>
-              {t('login.sentTo')} <strong style={{ color: 'var(--text-primary)' }}>{phone}</strong>
+            <h2 className="mb-1.5 text-lg md:text-xl">{t('login.enterCode')}</h2>
+            <p className="text-muted text-xs md:text-sm mb-2">
+              {t('login.sentTo')} <strong className="text-[var(--text-primary)]">{phone}</strong>
             </p>
-            <p className="text-xs text-muted" style={{ marginBottom: 24 }}>
+            <p className="text-[10px] md:text-xs text-muted mb-4 md:mb-6">
               {t('login.devHint')}
             </p>
 
-            <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'center' }}>
+            <form onSubmit={handleVerifyOtp} className="flex flex-col items-center gap-4 md:gap-5">
               <OtpInput value={otp} onChange={setOtp} disabled={loading} />
 
               <button
@@ -430,22 +404,21 @@ export default function LoginPage() {
 
         {/* ── Step: Name (new users only) ── */}
         {step === 'name' && (
-          <div className="card animate-slide-up" style={{ padding: 32 }}>
-            <div style={{ textAlign: 'center', marginBottom: 20 }}>
-              <div style={{ fontSize: 36, marginBottom: 8 }}>👋</div>
-              <h2 style={{ fontSize: '1.25rem', marginBottom: 4 }}>{t('login.welcomeNew')}</h2>
-              <p className="text-muted text-sm">{t('login.whatShouldWeCallYou')}</p>
+          <div className="card animate-slide-up p-5 md:p-8">
+            <div className="text-center mb-4 md:mb-5">
+              <div className="text-[28px] md:text-4xl mb-2">👋</div>
+              <h2 className="text-lg md:text-xl mb-1">{t('login.welcomeNew')}</h2>
+              <p className="text-muted text-xs md:text-sm">{t('login.whatShouldWeCallYou')}</p>
             </div>
 
-            <form onSubmit={handleSaveName} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <form onSubmit={handleSaveName} className="flex flex-col gap-3 md:gap-4">
               <div className="input-group">
-                <label>{t('login.yourName')}</label>
-                <div style={{ position: 'relative' }}>
-                  <User size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <label className="text-xs md:text-sm">{t('login.yourName')}</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] w-3.5 h-3.5 md:w-4 md:h-4" />
                   <input
                     id="name-input"
-                    className="input w-full"
-                    style={{ paddingLeft: 36 }}
+                    className="input w-full pl-8 md:pl-9 text-sm md:text-base"
                     placeholder={t('login.fullName')}
                     value={name}
                     onChange={e => setName(e.target.value)}

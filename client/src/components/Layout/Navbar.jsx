@@ -17,11 +17,11 @@ export default function Navbar() {
   const isActive = (path) => location.pathname === path ? 'active' : '';
 
   return (
-    <nav className="navbar">
-      <div className="container">
+    <nav className="navbar h-[56px] md:h-[68px]">
+      <div className="container h-full flex items-center justify-between gap-2 md:gap-4">
         {/* Brand */}
-        <Link to="/" className="navbar-brand">
-          <div className="navbar-brand-icon">🍽</div>
+        <Link to="/" className="navbar-brand text-[1.1rem] md:text-[1.3rem] gap-2 md:gap-2.5">
+          <div className="navbar-brand-icon !w-6 !h-6 md:!w-[34px] md:!h-[34px] !text-sm md:!text-base">🍽</div>
           TableBook
         </Link>
 
@@ -57,7 +57,7 @@ export default function Navbar() {
         </div>
 
         {/* Right controls */}
-        <div className="navbar-controls">
+        <div className="navbar-controls gap-1.5 md:gap-2">
           {/* Language switcher */}
           <div className="lang-switcher hidden md:flex" role="group" aria-label="Language switcher">
             {LANGS.map(l => (
@@ -86,9 +86,9 @@ export default function Navbar() {
 
           {/* User area */}
           {isAuthenticated ? (
-            <div className="navbar-user">
+            <div className="navbar-user gap-1 md:gap-1.5">
               <button
-                className="navbar-avatar"
+                className="navbar-avatar !w-8 !h-8 md:!w-9 md:!h-9 !text-sm md:!text-[0.9rem]"
                 id="profile-nav-btn"
                 onClick={() => navigate(isCEO ? '/ceo/profile' : '/profile')}
                 title={isCEO ? 'CEO Profile' : t('nav.profile')}
@@ -106,8 +106,8 @@ export default function Navbar() {
               </button>
             </div>
           ) : (
-            <Link to="/login" className="btn btn-primary btn-sm" id="sign-in-btn">
-              <LogIn size={14} />
+            <Link to="/login" className="btn btn-primary btn-sm px-2.5 py-1.5 md:px-3.5 md:py-[7px] text-[11px] md:text-xs" id="sign-in-btn">
+              <LogIn size={14} className="w-3.5 md:w-4" />
               <span>{t('nav.signIn')}</span>
             </Link>
           )}

@@ -101,8 +101,8 @@ export default function HomePage() {
 
 
   return (
-    <div className="container" style={{ paddingTop: 16 }}>
-      <div style={{ marginBottom: 20 }}>
+    <div className="container pt-3 md:pt-4">
+      <div className="mb-4 md:mb-5">
         <h1 className="text-[28px] md:text-[2.5rem]">{t('home.title')}</h1>
         <p className="text-muted">{t('home.subtitle')}</p>
       </div>
@@ -111,11 +111,10 @@ export default function HomePage() {
         {/* Sidebar */}
         <div className={`flex flex-col gap-3 overflow-hidden h-[calc(100vh-220px)] md:h-auto ${showMap ? 'hidden md:flex' : 'flex'}`}>
           {/* Search */}
-          <div style={{ position: 'relative' }}>
-            <Search size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <div className="relative">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
             <input
-              className="input w-full"
-              style={{ paddingLeft: 38 }}
+              className="input w-full pl-9"
               placeholder={t('home.search')}
               value={search}
               onChange={e => setSearch(e.target.value)}
@@ -124,7 +123,7 @@ export default function HomePage() {
           </div>
 
           {/* Restaurant List */}
-          <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8, paddingRight: 4 }}>
+          <div className="flex-1 overflow-y-auto flex flex-col gap-2 pr-1">
             {loading ? (
               <div className="loading-page"><div className="spinner" /></div>
             ) : filtered.length === 0 ? (
@@ -132,28 +131,25 @@ export default function HomePage() {
             ) : filtered.map(r => (
               <div
                 key={r.id}
-                className="card"
+                className="card cursor-pointer p-3 md:p-4 transition-all duration-200"
                 style={{
-                  cursor: 'pointer',
-                  padding: 16,
                   borderColor: hoveredId === r.id ? 'var(--accent)' : undefined,
                   boxShadow: hoveredId === r.id ? 'var(--shadow-accent)' : undefined,
-                  transition: 'all 0.2s ease'
                 }}
                 onMouseEnter={() => { setHoveredId(r.id); setFlyTo([r.lat, r.lng]); }}
                 onMouseLeave={() => setHoveredId(null)}
                 onClick={() => navigate(`/restaurant/${r.id}`)}
                 id={`restaurant-card-${r.id}`}
               >
-                <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+                <div className="flex items-center gap-2.5 md:gap-3.5">
                   {r.imageUrl ? (
-                    <img src={r.imageUrl} alt={r.name} style={{ width: 64, height: 64, borderRadius: 'var(--radius-md)', objectFit: 'cover' }} />
+                    <img src={r.imageUrl} alt={r.name} className="w-14 h-14 md:w-16 md:h-16 rounded-[var(--radius-md)] object-cover" />
                   ) : (
-                    <div style={{ width: 64, height: 64, borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, var(--accent), #059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>🍽</div>
+                    <div className="w-14 h-14 md:w-16 md:h-16 rounded-[var(--radius-md)] flex items-center justify-center text-xl md:text-2xl" style={{ background: 'linear-gradient(135deg, var(--accent), #059669)' }}>🍽</div>
                   )}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <h3 style={{ fontSize: '1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="text-sm md:text-base whitespace-nowrap overflow-hidden text-ellipsis">
                         {getTranslatedField(r.name, lang)}
                       </h3>
                       <div className="rating">
@@ -161,12 +157,12 @@ export default function HomePage() {
                         <span style={{ fontSize: '0.85rem' }}>{r.rating}</span>
                       </div>
                     </div>
-                    <p className="text-xs text-muted" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <p className="text-xs text-muted flex items-center gap-1">
                       <MapPin size={11} /> {r.address}
                     </p>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 }}>
-                      <span className="badge badge-accent">{r.cuisineType}</span>
-                      <span className="text-xs text-muted" style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                    <div className="flex items-center justify-between mt-1.5">
+                      <span className="badge badge-accent text-[10px] md:text-xs">{r.cuisineType}</span>
+                      <span className="text-xs text-muted flex items-center gap-1">
                         <Clock size={11} /> {r.openingHours}
                       </span>
                     </div>

@@ -78,27 +78,27 @@ export default function RestaurantPage() {
   const totalCount = availability ? availability.length : 0;
 
   return (
-    <div className="container" style={{ paddingTop: 16, paddingBottom: 40 }}>
+    <div className="container pt-4 pb-10">
       {/* Restaurant Header */}
-      <div className="animate-fade-in" style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 20 }}>
+      <div className="animate-fade-in mb-6">
+        <div className="flex items-start gap-3 md:gap-5">
           {restaurant.imageUrl ? (
-            <img src={restaurant.imageUrl} alt={restaurant.name} style={{ width: 100, height: 100, borderRadius: 'var(--radius-lg)', objectFit: 'cover' }} />
+            <img src={restaurant.imageUrl} alt={restaurant.name} className="w-20 h-20 md:w-[100px] md:h-[100px] rounded-[var(--radius-lg)] object-cover" />
           ) : (
-            <div style={{ width: 100, height: 100, borderRadius: 'var(--radius-lg)', background: 'linear-gradient(135deg, var(--accent), #059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36 }}>🍽</div>
+            <div className="w-20 h-20 md:w-[100px] md:h-[100px] rounded-[var(--radius-lg)] flex items-center justify-center text-3xl md:text-4xl" style={{ background: 'linear-gradient(135deg, var(--accent), #059669)' }}>🍽</div>
           )}
-          <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-              <h1 style={{ fontSize: '1.75rem' }}>{getTranslatedField(restaurant.name, lang)}</h1>
-              <div className="rating" style={{ fontSize: '1.1rem' }}>
-                <Star size={18} fill="currentColor" />
+          <div className="flex-1">
+            <div className="flex items-center gap-2 md:gap-3 mb-1">
+              <h1 className="text-xl md:text-[1.75rem]">{getTranslatedField(restaurant.name, lang)}</h1>
+              <div className="rating text-sm md:text-[1.1rem]">
+                <Star size={16} fill="currentColor" className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 {restaurant.rating}/10
               </div>
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={14} /> {restaurant.address}</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={14} /> {restaurant.openingHours}</span>
-              {restaurant.phone && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Phone size={14} /> {restaurant.phone}</span>}
+            <div className="flex flex-wrap gap-2 md:gap-4 text-[var(--text-secondary)] text-xs md:text-sm mt-1">
+              <span className="flex items-center gap-1"><MapPin size={12} className="md:w-3.5 md:h-3.5" /> {restaurant.address}</span>
+              <span className="flex items-center gap-1"><Clock size={12} className="md:w-3.5 md:h-3.5" /> {restaurant.openingHours}</span>
+              {restaurant.phone && <span className="flex items-center gap-1"><Phone size={12} className="md:w-3.5 md:h-3.5" /> {restaurant.phone}</span>}
             </div>
             {restaurant.description && <p className="text-sm text-muted" style={{ marginTop: 8, maxWidth: 600 }}>{getTranslatedField(restaurant.description, lang)}</p>}
             <span className="badge badge-accent mt-1">{restaurant.cuisineType}</span>
@@ -107,7 +107,7 @@ export default function RestaurantPage() {
       </div>
 
       {/* Tabs */}
-      <div className="tabs overflow-x-auto whitespace-nowrap max-w-full pb-1" style={{ marginBottom: 20, display: 'inline-flex' }}>
+      <div className="tabs overflow-x-auto whitespace-nowrap max-w-full pb-1 mb-4 md:mb-5 inline-flex">
         {isCustomer && (
           <button className={`tab ${activeTab === 'book' ? 'active' : ''}`} onClick={() => setActiveTab('book')}>
             🪑 {t('restaurant.bookTab')}
@@ -125,7 +125,7 @@ export default function RestaurantPage() {
       {activeTab === 'book' && (
         <div className={`animate-fade-in restaurant-book-grid grid gap-5 ${selectedTable ? 'grid-cols-1 md:grid-cols-[1fr_380px]' : 'grid-cols-1'}`}>
           <div>
-            <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <div className="flex gap-2 md:gap-3 mb-4 flex-wrap items-end">
               <div className="input-group">
                 <label>{t('restaurant.date')}</label>
                 <input type="date" className="input" value={checkDate} onChange={e => setCheckDate(e.target.value)} min={new Date().toISOString().split('T')[0]} />
@@ -148,7 +148,7 @@ export default function RestaurantPage() {
               </p>
             </div>
 
-            <div className="floor-plan-wrapper overflow-auto touch-pan-x touch-pan-y" style={{ maxWidth: '100%', WebkitOverflowScrolling: 'touch' }}>
+            <div className="floor-plan-wrapper overflow-auto touch-pan-x touch-pan-y h-[250px] md:h-auto" style={{ maxWidth: '100%', WebkitOverflowScrolling: 'touch' }}>
               <FloorPlanViewer
                 floorPlan={floorPlan}
                 availability={availability}
@@ -159,7 +159,7 @@ export default function RestaurantPage() {
             </div>
 
             {!selectedTable && (
-              <p className="text-muted text-sm mt-2" style={{ textAlign: 'center' }}>
+              <p className="text-muted text-xs md:text-sm mt-2 text-center">
                 {t('restaurant.clickHint')}
               </p>
             )}
@@ -186,8 +186,8 @@ export default function RestaurantPage() {
       )}
 
       {activeTab === 'info' && (
-        <div className="animate-fade-in" style={{ maxWidth: 600 }}>
-          <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className="animate-fade-in max-w-[600px]">
+          <div className="card flex flex-col gap-3 md:gap-4 p-4 md:p-6">
             {[
               [t('restaurant.address'), restaurant.address],
               [t('restaurant.openingHours'), restaurant.openingHours],
@@ -197,8 +197,8 @@ export default function RestaurantPage() {
               [t('restaurant.tables'), `${restaurant.tables?.length} ${t('restaurant.tablesCount')}`],
             ].filter(Boolean).map(([label, value]) => (
               <div key={label}>
-                <p className="text-xs text-muted" style={{ fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>{label}</p>
-                <p>{value}</p>
+                <p className="text-[10px] md:text-xs text-muted font-semibold uppercase mb-1">{label}</p>
+                <p className="text-sm md:text-base">{value}</p>
               </div>
             ))}
           </div>

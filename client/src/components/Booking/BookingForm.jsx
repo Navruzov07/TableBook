@@ -90,7 +90,7 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
   };
 
   return (
-    <div className="card animate-slide-up" style={{ maxHeight: '90vh', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+    <div className="card animate-slide-up flex flex-col p-3 md:p-6 overflow-y-auto max-h-[85vh] md:max-h-none h-full relative">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div>
           <h3>{t('booking.title')} - {table?.label}</h3>
@@ -106,18 +106,18 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14, flex: 1, minHeight: 0 }}>
         <div className="flex flex-col md:flex-row gap-3">
           <div className="input-group flex-1">
-            <label><Calendar size={12} style={{ verticalAlign: 'middle' }} /> {t('booking.date')}</label>
-            <input type="date" className="input w-full" value={form.bookingDate} onChange={update('bookingDate')} min={today} required />
+            <label className="text-xs md:text-sm"><Calendar size={12} style={{ verticalAlign: 'middle' }} /> {t('booking.date')}</label>
+            <input type="date" className="input w-full text-sm md:text-[15px]" value={form.bookingDate} onChange={update('bookingDate')} min={today} required />
           </div>
           <div className="input-group flex-1">
-            <label><Clock size={12} style={{ verticalAlign: 'middle' }} /> {t('booking.time')}</label>
-            <input type="time" className="input w-full" value={form.startTime} onChange={update('startTime')} step="1800" required />
+            <label className="text-xs md:text-sm"><Clock size={12} style={{ verticalAlign: 'middle' }} /> {t('booking.time')}</label>
+            <input type="time" className="input w-full text-sm md:text-[15px]" value={form.startTime} onChange={update('startTime')} step="1800" required />
           </div>
         </div>
 
         <div className="input-group">
-          <label><Users size={12} style={{ verticalAlign: 'middle' }} /> {t('booking.guests')}</label>
-          <select className="input" value={form.guestCount} onChange={update('guestCount')}>
+          <label className="text-xs md:text-sm"><Users size={12} style={{ verticalAlign: 'middle' }} /> {t('booking.guests')}</label>
+          <select className="input text-sm md:text-[15px]" value={form.guestCount} onChange={update('guestCount')}>
             {Array.from({ length: table?.seats || 10 }, (_, i) => (
               <option key={i + 1} value={i + 1}>{i + 1}</option>
             ))}
@@ -125,8 +125,8 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
         </div>
 
         <div className="input-group">
-          <label><FileText size={12} style={{ verticalAlign: 'middle' }} /> {t('booking.notes')}</label>
-          <textarea className="input" placeholder={t('booking.notesPlaceholder')} value={form.notes} onChange={update('notes')} />
+          <label className="text-xs md:text-sm"><FileText size={12} style={{ verticalAlign: 'middle' }} /> {t('booking.notes')}</label>
+          <textarea className="input text-sm md:text-[15px]" placeholder={t('booking.notesPlaceholder')} value={form.notes} onChange={update('notes')} />
         </div>
 
         {/* Pre-order Section */}

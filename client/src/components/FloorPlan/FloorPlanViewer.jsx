@@ -17,6 +17,7 @@ const COLORS = {
 export default function FloorPlanViewer({ floorPlan, availability, selectedTable, onSelectTable, scale = 1 }) {
   if (!floorPlan || !floorPlan.tables) return null;
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const { width = 800, height = 600, tables = [], decorations = [] } = floorPlan;
 
   const getTableStatus = (tableId) => {
@@ -50,7 +51,7 @@ export default function FloorPlanViewer({ floorPlan, availability, selectedTable
                     fill={COLORS.kitchen} cornerRadius={4}
                     stroke="rgba(255,255,255,0.08)" strokeWidth={1} />
                   <Text x={d.x + d.width / 2 - 25} y={d.y + d.height / 2 - 8}
-                    text="🍳 Kitchen" fontSize={13} fill={COLORS.textDim} />
+                    text="🍳 Kitchen" fontSize={isMobile ? 11 : 13} fill={COLORS.textDim} />
                 </Group>
               );
             }
@@ -61,7 +62,7 @@ export default function FloorPlanViewer({ floorPlan, availability, selectedTable
                     fill={COLORS.bar} cornerRadius={4}
                     stroke="rgba(255,255,255,0.08)" strokeWidth={1} />
                   <Text x={d.x + d.width / 2 - 15} y={d.y + d.height / 2 - 8}
-                    text="🍸 Bar" fontSize={13} fill={COLORS.textDim} />
+                    text="🍸 Bar" fontSize={isMobile ? 11 : 13} fill={COLORS.textDim} />
                 </Group>
               );
             }
@@ -95,6 +96,7 @@ export default function FloorPlanViewer({ floorPlan, availability, selectedTable
             const isBooked = status === 'booked';
 
             if (table.shape === 'circle') {
+              const r = isMobile ? Math.min(table.radius, 30) : table.radius;
               return (
                 <Group
                   key={table.id}
@@ -104,11 +106,11 @@ export default function FloorPlanViewer({ floorPlan, availability, selectedTable
                 >
                   {/* Glow effect */}
                   {status === 'selected' && (
-                    <Circle x={table.x} y={table.y} radius={table.radius + 8}
+                    <Circle x={table.x} y={table.y} radius={r + (isMobile ? 4 : 8)}
                       fill="rgba(255, 170, 0, 0.15)" />
                   )}
                   <Circle
-                    x={table.x} y={table.y} radius={table.radius}
+                    x={table.x} y={table.y} radius={r}
                     fill={color} opacity={isBooked ? 0.3 : 0.85}
                     stroke={status === 'selected' ? '#fff' : 'rgba(255,255,255,0.15)'}
                     strokeWidth={status === 'selected' ? 2 : 1}
@@ -117,24 +119,24 @@ export default function FloorPlanViewer({ floorPlan, availability, selectedTable
                     shadowOpacity={0.5}
                   />
                   <Text
-                    x={table.x - table.radius} y={table.y - 14}
-                    width={table.radius * 2} align="center"
-                    text={table.label} fontSize={11} fontStyle="bold" fill={isBooked ? COLORS.textDim : '#fff'}
+                    x={table.x - r} y={table.y - (isMobile ? 10 : 14)}
+                    width={r * 2} align="center"
+                    text={table.label} fontSize={isMobile ? 9 : 11} fontStyle="bold" fill={isBooked ? COLORS.textDim : '#fff'}
                   />
                   <Text
-                    x={table.x - table.radius} y={table.y + 2}
-                    width={table.radius * 2} align="center"
-                    text={`${table.seats} seats`} fontSize={9} fill={isBooked ? COLORS.textDim : 'rgba(255,255,255,0.7)'}
+                    x={table.x - r} y={table.y + 2}
+                    width={r * 2} align="center"
+                    text={`${table.seats} seats`} fontSize={isMobile ? 8 : 9} fill={isBooked ? COLORS.textDim : 'rgba(255,255,255,0.7)'}
                   />
                 </Group>
               );
             }
 
             // Rectangle table
-            const rx = table.x - (table.width || 80) / 2;
-            const ry = table.y - (table.height || 50) / 2;
-            const tw = table.width || 80;
-            const th = table.height || 50;
+            const tw = isMobile ? Math.min(table.width || 80, 60) : (table.width || 80);
+            const th = isMobile ? Math.min(table.height || 50, 60) : (table.height || 50);
+            const rx = table.x - tw / 2;
+            const ry = table.y - th / 2;
 
             return (
               <Group
@@ -157,14 +159,14 @@ export default function FloorPlanViewer({ floorPlan, availability, selectedTable
                   shadowOpacity={0.5}
                 />
                 <Text
-                  x={rx} y={ry + th / 2 - 14}
+                  x={rx} y={ry + th / 2 - (isMobile ? 10 : 14)}
                   width={tw} align="center"
-                  text={table.label} fontSize={11} fontStyle="bold" fill={isBooked ? COLORS.textDim : '#fff'}
+                  text={table.label} fontSize={isMobile ? 9 : 11} fontStyle="bold" fill={isBooked ? COLORS.textDim : '#fff'}
                 />
                 <Text
                   x={rx} y={ry + th / 2 + 2}
                   width={tw} align="center"
-                  text={`${table.seats} seats`} fontSize={9} fill={isBooked ? COLORS.textDim : 'rgba(255,255,255,0.7)'}
+                  text={`${table.seats} seats`} fontSize={isMobile ? 8 : 9} fill={isBooked ? COLORS.textDim : 'rgba(255,255,255,0.7)'}
                 />
               </Group>
             );
@@ -179,8 +181,8 @@ export default function FloorPlanViewer({ floorPlan, availability, selectedTable
           { color: COLORS.booked, label: 'Booked' },
           { color: COLORS.selected, label: 'Selected' }
         ].map(l => (
-          <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-secondary)' }}>
-            <span style={{ width: 10, height: 10, borderRadius: '50%', background: l.color, display: 'inline-block' }} />
+          <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: isMobile ? 11 : 12, color: 'var(--text-secondary)' }}>
+            <span style={{ width: isMobile ? 8 : 10, height: isMobile ? 8 : 10, borderRadius: '50%', background: l.color, display: 'inline-block' }} />
             {l.label}
           </div>
         ))}
