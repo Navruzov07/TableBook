@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useTheme } from '../../context/ThemeContext.jsx';
 import { useLang } from '../../context/LangContext.jsx';
-import { MapPin, CalendarDays, Shield, LogOut, LogIn, Sun, Moon, LayoutDashboard } from 'lucide-react';
+import { MapPin, CalendarDays, Shield, LogOut, LogIn, Sun, Moon, LayoutDashboard, Home, Search, User } from 'lucide-react';
 
 const LANGS = ['uz', 'ru', 'en'];
 const LANG_LABELS = { uz: 'UZ', ru: 'RU', en: 'EN' };
@@ -26,7 +26,7 @@ export default function Navbar() {
         </Link>
 
         {/* Nav links */}
-        <div className="navbar-links">
+        <div className="navbar-links hidden md:flex">
           {(!user || user.role === 'customer') && (
             <Link to="/" className={isActive('/')}>
               <MapPin size={15} style={{ verticalAlign: 'middle', marginRight: 4 }} />
@@ -59,7 +59,7 @@ export default function Navbar() {
         {/* Right controls */}
         <div className="navbar-controls">
           {/* Language switcher */}
-          <div className="lang-switcher" role="group" aria-label="Language switcher">
+          <div className="lang-switcher hidden md:flex" role="group" aria-label="Language switcher">
             {LANGS.map(l => (
               <button
                 key={l}
@@ -112,6 +112,37 @@ export default function Navbar() {
             </Link>
           )}
         </div>
+      </div>
+
+      {/* Mobile Bottom Tab Bar */}
+      <div className="fixed bottom-0 left-0 w-full bg-[var(--navbar-bg)] border-t border-[var(--border)] flex justify-around items-center py-2 z-[1000] md:hidden backdrop-blur-md pb-[max(8px,env(safe-area-inset-bottom))]">
+        <Link to="/" className={`flex flex-col items-center gap-1 p-2 ${isActive('/') ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]'}`}>
+          <Home size={20} />
+          <span className="text-[10px] font-semibold">{t('nav.explore') || 'Home'}</span>
+        </Link>
+        <button 
+          onClick={() => {
+            if (location.pathname !== '/') {
+              navigate('/');
+            }
+            setTimeout(() => document.getElementById('restaurant-search')?.focus(), 100);
+          }}
+          className="flex flex-col items-center gap-1 p-2 text-[var(--text-muted)]"
+        >
+          <Search size={20} />
+          <span className="text-[10px] font-semibold">{t('common.search') || 'Search'}</span>
+        </button>
+        {isAuthenticated ? (
+          <Link to={isCEO ? '/ceo/profile' : '/profile'} className={`flex flex-col items-center gap-1 p-2 ${location.pathname.includes('profile') ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]'}`}>
+            <User size={20} />
+            <span className="text-[10px] font-semibold">{t('nav.profile')}</span>
+          </Link>
+        ) : (
+          <Link to="/login" className={`flex flex-col items-center gap-1 p-2 ${isActive('/login') ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]'}`}>
+            <LogIn size={20} />
+            <span className="text-[10px] font-semibold">{t('nav.signIn')}</span>
+          </Link>
+        )}
       </div>
     </nav>
   );

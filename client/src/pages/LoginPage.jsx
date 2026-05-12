@@ -48,7 +48,7 @@ function OtpInput({ value, onChange, disabled }) {
   };
 
   return (
-    <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+    <div className="flex gap-1.5 md:gap-2.5 justify-center w-full max-w-[320px] md:max-w-none mx-auto">
       {digits.map((digit, i) => (
         <input
           key={i}
@@ -63,20 +63,12 @@ function OtpInput({ value, onChange, disabled }) {
           onPaste={handlePaste}
           disabled={disabled}
           id={`otp-digit-${i}`}
-          className="otp-box"
+          className="otp-box w-[40px] h-[50px] md:w-[48px] md:h-[56px] text-center text-xl md:text-2xl font-bold rounded-md outline-none transition-colors duration-150"
           autoComplete="one-time-code"
           style={{
-            width: 48,
-            height: 56,
-            textAlign: 'center',
-            fontSize: '1.5rem',
-            fontWeight: 700,
-            borderRadius: 'var(--radius-md)',
             border: `2px solid ${digit ? 'var(--accent)' : 'var(--border)'}`,
             background: 'var(--bg-card)',
             color: 'var(--text-primary)',
-            outline: 'none',
-            transition: 'border-color 0.15s ease',
             fontFamily: 'inherit',
             caretColor: 'var(--accent)',
           }}
@@ -258,7 +250,7 @@ export default function LoginPage() {
   return (
     <div
       style={{
-        minHeight: '100vh',
+        minHeight: '100dvh',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

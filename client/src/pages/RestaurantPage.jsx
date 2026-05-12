@@ -107,7 +107,7 @@ export default function RestaurantPage() {
       </div>
 
       {/* Tabs */}
-      <div className="tabs" style={{ marginBottom: 20, display: 'inline-flex' }}>
+      <div className="tabs overflow-x-auto whitespace-nowrap max-w-full pb-1" style={{ marginBottom: 20, display: 'inline-flex' }}>
         {isCustomer && (
           <button className={`tab ${activeTab === 'book' ? 'active' : ''}`} onClick={() => setActiveTab('book')}>
             🪑 {t('restaurant.bookTab')}
@@ -123,7 +123,7 @@ export default function RestaurantPage() {
 
       {/* Book Tab */}
       {activeTab === 'book' && (
-        <div className="animate-fade-in restaurant-book-grid" style={{ display: 'grid', gridTemplateColumns: selectedTable ? '1fr 380px' : '1fr', gap: 20 }}>
+        <div className={`animate-fade-in restaurant-book-grid grid gap-5 ${selectedTable ? 'grid-cols-1 md:grid-cols-[1fr_380px]' : 'grid-cols-1'}`}>
           <div>
             <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
               <div className="input-group">
@@ -148,7 +148,7 @@ export default function RestaurantPage() {
               </p>
             </div>
 
-            <div className="floor-plan-wrapper">
+            <div className="floor-plan-wrapper overflow-auto touch-pan-x touch-pan-y" style={{ maxWidth: '100%', WebkitOverflowScrolling: 'touch' }}>
               <FloorPlanViewer
                 floorPlan={floorPlan}
                 availability={availability}
@@ -166,7 +166,7 @@ export default function RestaurantPage() {
           </div>
 
           {selectedTable && (
-            <div className="animate-slide-up">
+            <div className="fixed md:relative bottom-0 left-0 w-full md:w-auto z-[1002] md:z-auto bg-[var(--bg-card-solid)] md:bg-transparent rounded-t-[20px] md:rounded-none shadow-[var(--shadow-lg)] md:shadow-none pb-[max(16px,env(safe-area-inset-bottom))] md:pb-0 animate-slide-up">
               <BookingForm
                 restaurant={restaurant}
                 table={selectedTable}

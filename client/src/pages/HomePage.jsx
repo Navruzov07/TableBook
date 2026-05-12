@@ -58,6 +58,7 @@ export default function HomePage() {
   const [hoveredId, setHoveredId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userPosition, setUserPosition] = useState(null);
+  const [showMap, setShowMap] = useState(false);
   const { user } = useAuth();
   const { t, lang } = useLang();
   const navigate = useNavigate();
@@ -102,13 +103,13 @@ export default function HomePage() {
   return (
     <div className="container" style={{ paddingTop: 16 }}>
       <div style={{ marginBottom: 20 }}>
-        <h1>{t('home.title')}</h1>
+        <h1 className="text-[28px] md:text-[2.5rem]">{t('home.title')}</h1>
         <p className="text-muted">{t('home.subtitle')}</p>
       </div>
 
-      <div className="home-grid" style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: 20, height: 'calc(100vh - 160px)' }}>
+      <div className="home-grid grid grid-cols-1 md:grid-cols-[380px_1fr] gap-5 relative md:h-[calc(100vh-160px)] pb-[80px] md:pb-0">
         {/* Sidebar */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, overflow: 'hidden' }}>
+        <div className={`flex flex-col gap-3 overflow-hidden h-[calc(100vh-220px)] md:h-auto ${showMap ? 'hidden md:flex' : 'flex'}`}>
           {/* Search */}
           <div style={{ position: 'relative' }}>
             <Search size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
@@ -177,7 +178,7 @@ export default function HomePage() {
         </div>
 
         {/* Map */}
-        <div className="home-map-container" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', border: '1px solid var(--border)' }}>
+        <div className={`home-map-container rounded-lg overflow-hidden border border-[var(--border)] h-[calc(100vh-220px)] md:h-auto ${showMap ? 'block' : 'hidden md:block'}`}>
           <MapContainer center={center} zoom={14} style={{ width: '100%', height: '100%' }} zoomControl={false}>
             <TileLayer
               url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
@@ -233,6 +234,15 @@ export default function HomePage() {
           </MapContainer>
         </div>
       </div>
+
+      {/* Mobile Map Toggle FAB */}
+      <button
+        className="fixed bottom-[80px] right-6 md:hidden z-[1001] bg-[var(--accent)] text-[#000] p-4 rounded-full shadow-lg flex items-center justify-center font-bold"
+        onClick={() => setShowMap(!showMap)}
+        aria-label="Toggle map"
+      >
+        {showMap ? <Search size={22} /> : <MapPin size={22} />}
+      </button>
 
       {/* Keyframe for blue dot pulse animation on SVG paths */}
       <style>{`

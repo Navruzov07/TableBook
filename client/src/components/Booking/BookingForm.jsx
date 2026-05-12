@@ -104,21 +104,14 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
       </div>
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14, flex: 1, minHeight: 0 }}>
-        <div className="booking-date-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          <div className="input-group">
+        <div className="flex flex-col md:flex-row gap-3">
+          <div className="input-group flex-1">
             <label><Calendar size={12} style={{ verticalAlign: 'middle' }} /> {t('booking.date')}</label>
-            <input type="date" className="input" value={form.bookingDate} onChange={update('bookingDate')} min={today} required />
+            <input type="date" className="input w-full" value={form.bookingDate} onChange={update('bookingDate')} min={today} required />
           </div>
-          <div className="input-group">
+          <div className="input-group flex-1">
             <label><Clock size={12} style={{ verticalAlign: 'middle' }} /> {t('booking.time')}</label>
-            <select className="input" value={form.startTime} onChange={update('startTime')}>
-              {Array.from({ length: 28 }, (_, i) => {
-                const h = Math.floor(i / 2) + 10;
-                const m = i % 2 === 0 ? '00' : '30';
-                if (h > 23) return null;
-                return <option key={i} value={`${h.toString().padStart(2, '0')}:${m}`}>{h}:{m}</option>;
-              }).filter(Boolean)}
-            </select>
+            <input type="time" className="input w-full" value={form.startTime} onChange={update('startTime')} step="1800" required />
           </div>
         </div>
 
@@ -268,13 +261,15 @@ export default function BookingForm({ restaurant, table, menu, onClose, onSucces
         </div>
 
         {(!user || user.role === 'customer') && (
-          <button 
-            className="btn btn-primary btn-lg w-full" 
-            disabled={loading || !termsAccepted || (isAuthenticated && !user?.isPhoneVerified)} 
-            type="submit"
-          >
-            {loading ? t('common.loading') : t('booking.bookingTitle')}
-          </button>
+          <div className="sticky bottom-0 left-0 w-full bg-[var(--bg-card-solid)] md:bg-transparent pt-3 pb-2 md:p-0 z-[1003]">
+            <button 
+              className="btn btn-primary btn-lg w-full shadow-[var(--shadow-lg)] md:shadow-none" 
+              disabled={loading || !termsAccepted || (isAuthenticated && !user?.isPhoneVerified)} 
+              type="submit"
+            >
+              {loading ? t('common.loading') : t('booking.bookingTitle')}
+            </button>
+          </div>
         )}
       </form>
     </div>

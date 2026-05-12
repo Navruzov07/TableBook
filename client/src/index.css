@@ -1,3 +1,4 @@
+@tailwind utilities;
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
 /* ============================================================
@@ -130,6 +131,12 @@ html {
   font-size: 16px;
   scroll-behavior: smooth;
   overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
 }
 
 body {
