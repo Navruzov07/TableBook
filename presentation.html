@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>TableBook — Hackathon 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --green:#22c55e;--cyan:#06b6d4;--dark:#0a1a12;
+  --card:rgba(255,255,255,0.05);--border:rgba(255,255,255,0.1);
+}
+body{font-family:'Inter',sans-serif;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;overflow:hidden;}
+#stage{position:relative;width:1280px;height:720px;overflow:hidden;border-radius:12px;box-shadow:0 0 80px rgba(34,197,94,0.2);}
+.slide{position:absolute;inset:0;width:100%;height:100%;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity 0.5s ease,transform 0.5s ease;transform:translateY(24px);}
+.slide.active{opacity:1;pointer-events:all;transform:translateY(0);}
+.slide.exit{opacity:0;transform:translateY(-24px);}
+
+/* Backgrounds */
+.bg-nice{background:url('niceee.png') center/cover no-repeat;}
+.bg-rest{background:url('tbookbg.png') center/cover no-repeat;}
+.overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,26,18,0.92) 0%,rgba(10,26,18,0.78) 100%);}
+
+/* Bottom glow bar */
+.glow-bar{position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--green),var(--cyan),var(--green));background-size:200%;animation:glowMove 3s linear infinite;}
+@keyframes glowMove{0%{background-position:0%}100%{background-position:200%}}
+
+/* Slide counter & nav */
+#counter{position:absolute;bottom:18px;right:72px;color:rgba(255,255,255,0.5);font-size:13px;font-weight:500;z-index:100;}
+#nav{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:12px;z-index:100;}
+.nav-btn{background:rgba(255,255,255,0.08);border:1px solid var(--border);color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.nav-btn:hover{background:var(--green);color:#000;}
+
+/* Common */
+.content{position:relative;z-index:2;padding:48px 60px;flex:1;display:flex;flex-direction:column;}
+.slide-title{font-size:36px;font-weight:800;color:#fff;margin-bottom:6px;letter-spacing:-0.5px;}
+.title-line{width:56px;height:3px;background:var(--green);border-radius:2px;margin-bottom:32px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 24px;box-shadow:0 4px 24px rgba(0,0,0,0.3);}
+
+/* ── SLIDE 1 ── */
+#s1 .content{align-items:center;justify-content:center;text-align:center;}
+.s1-logo{font-size:96px;font-weight:900;color:#fff;letter-spacing:-4px;animation:fadeUp 0.8s ease forwards;}
+.s1-sub{font-size:22px;color:var(--green);font-weight:500;margin-top:12px;overflow:hidden;white-space:nowrap;border-right:3px solid var(--green);width:0;animation:typing 1.8s steps(44) 0.6s forwards,blink 0.8s step-end infinite 2.4s;}
+@keyframes typing{to{width:100%}}
+@keyframes blink{50%{border-color:transparent}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.pills{display:flex;gap:14px;margin-top:28px;flex-wrap:wrap;justify-content:center;}
+.pill{background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.4);border-radius:999px;padding:8px 22px;color:#fff;font-size:15px;font-weight:600;animation:float 3s ease-in-out infinite;}
+.pill:nth-child(2){animation-delay:0.5s;}
+.pill:nth-child(3){animation-delay:1s;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.s1-bottom{position:absolute;bottom:28px;left:60px;font-size:13px;color:rgba(255,255,255,0.45);font-weight:400;}
+
+/* ── SLIDE 2 ── */
+.s2-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;flex:1;}
+.feat-cards{display:flex;flex-direction:column;gap:14px;}
+.feat-card{display:flex;align-items:flex-start;gap:14px;padding:18px 20px;}
+.feat-emoji{font-size:28px;flex-shrink:0;}
+.feat-card h3{font-size:16px;font-weight:700;color:#fff;margin-bottom:4px;}
+.feat-card p{font-size:13px;color:rgba(255,255,255,0.6);line-height:1.5;}
+.phone-mock{background:rgba(10,26,18,0.9);border:2px solid rgba(34,197,94,0.4);border-radius:28px;padding:16px;display:flex;flex-direction:column;gap:8px;height:100%;min-height:300px;}
+.phone-header{background:var(--green);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:#000;}
+.phone-map{background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.3);border-radius:10px;flex:1;display:flex;align-items:center;justify-content:center;font-size:28px;color:rgba(255,255,255,0.4);}
+.phone-item{background:rgba(255,255,255,0.07);border-radius:8px;padding:8px 12px;font-size:12px;color:rgba(255,255,255,0.7);display:flex;align-items:center;gap:8px;}
+
+/* ── SLIDE 3 ── */
+.prob-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1;}
+.prob-card{border-left:3px solid #ef4444;padding:14px 18px;font-size:14px;color:rgba(255,255,255,0.85);display:flex;align-items:center;gap:10px;font-weight:500;}
+.prob-card span.em{font-size:22px;}
+.prob-stat{text-align:center;margin-top:16px;font-size:18px;font-weight:700;color:var(--green);}
+
+/* ── SLIDE 4 ── */
+.sol-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;}
+.sol-card{padding:24px;display:flex;flex-direction:column;gap:8px;}
+.sol-emoji{font-size:36px;}
+.sol-card h3{font-size:17px;font-weight:700;color:#fff;}
+.sol-card p{font-size:13px;color:rgba(255,255,255,0.6);line-height:1.5;}
+
+/* ── SLIDE 5 ── */
+.comp-table{width:100%;border-collapse:collapse;flex:1;}
+.comp-table th{font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);padding:8px 12px;text-align:center;border-bottom:1px solid var(--border);}
+.comp-table th:first-child{text-align:left;}
+.comp-table td{padding:10px 12px;font-size:13px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.05);}
+.comp-table td:first-child{text-align:left;font-weight:600;color:#fff;}
+.comp-table tr.highlight{background:rgba(34,197,94,0.08);border-left:3px solid var(--green);}
+.comp-table tr.highlight td:first-child{color:var(--green);}
+.ck{color:var(--green);font-size:18px;}
+.xk{color:#ef4444;font-size:18px;}
+
+/* ── SLIDE 6 ── */
+.flow-row{display:flex;align-items:center;gap:0;flex:1;margin-top:12px;}
+.flow-card{flex:1;padding:22px 14px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.flow-emoji{font-size:34px;}
+.flow-card h4{font-size:13px;font-weight:700;color:#fff;}
+.flow-arrow{font-size:22px;color:var(--green);animation:pulse 1.5s ease-in-out infinite;flex-shrink:0;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.85)}}
+.flow-note{text-align:center;font-size:13px;color:rgba(255,255,255,0.5);margin-top:16px;font-style:italic;}
+
+/* ── SLIDE 7 ── */
+.biz-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;flex:1;}
+.biz-card{padding:28px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.biz-num{font-size:48px;font-weight:900;color:var(--green);line-height:1;}
+.biz-label{font-size:14px;font-weight:600;color:#fff;}
+.biz-desc{font-size:12px;color:rgba(255,255,255,0.5);}
+.biz-bottom{text-align:center;margin-top:16px;font-size:14px;color:rgba(255,255,255,0.6);font-weight:500;}
+
+/* ── SLIDE 8 ── */
+.road-row{display:flex;gap:16px;flex:1;align-items:stretch;}
+.road-card{flex:1;padding:22px 18px;border-top:3px solid var(--green);display:flex;flex-direction:column;gap:10px;}
+.road-tag{font-size:11px;font-weight:700;color:var(--cyan);background:rgba(6,182,212,0.12);border-radius:999px;padding:3px 10px;width:fit-content;}
+.road-emoji{font-size:30px;}
+.road-card h4{font-size:14px;font-weight:700;color:#fff;line-height:1.4;}
+
+/* ── SLIDE 9 ── */
+#s9 .content{align-items:center;justify-content:center;text-align:center;}
+.ty-title{font-size:80px;font-weight:900;color:#fff;}
+.ty-line{width:80px;height:3px;background:var(--green);border-radius:2px;margin:16px auto;animation:expandLine 1s ease 0.5s both;}
+@keyframes expandLine{from{width:0}to{width:80px}}
+.ty-link{font-size:24px;font-weight:700;color:var(--green);text-shadow:0 0 20px rgba(34,197,94,0.6);margin-top:12px;text-decoration:none;}
+.ty-built{font-size:13px;color:rgba(255,255,255,0.4);margin-top:14px;}
+.s9-bottom{position:absolute;bottom:28px;left:60px;font-size:13px;color:rgba(255,255,255,0.45);}
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- SLIDE 1 -->
+  <div class="slide bg-nice" id="s1">
+    <div class="content">
+      <div class="s1-logo">TableBook</div>
+      <div class="s1-sub">The next generation of restaurant booking</div>
+      <div class="pills">
+        <div class="pill">🗺️ Find</div>
+        <div class="pill">🪑 Book</div>
+        <div class="pill">🍽️ Pre-order</div>
+      </div>
+    </div>
+    <div class="s1-bottom">Hackathon 2026 &nbsp;|&nbsp; Jahongir Navruzov</div>
+    <div class="glow-bar"></div>
+  </div>
+
+  <!-- SLIDE 2 -->
+  <div class="slide bg-rest" id="s2">
+    <div class="overlay"></div>
+    <div class="content">
+      <div class="slide-title">📌 What is TableBook?</div>
+      <div class="title-line"></div>
+      <div class="s2-grid">
+        <div class="feat-cards">
+          <div class="card feat-card">
+            <div class="feat-emoji">🪑</div>
+            <div><h3>Visual Table Selection</h3><p>Pick your exact seat before arriving at the restaurant.</p></div>
+          </div>
+          <div class="card feat-card">
+            <div class="feat-emoji">🍽️</div>
+            <div><h3>Pre-order Food</h3><p>Order your meal in advance — food ready when you arrive.</p></div>
+          </div>
+          <div class="card feat-card">
+            <div class="feat-emoji">🗺️</div>
+            <div><h3>Map Discovery</h3><p>Find nearby restaurants instantly on an interactive map.</p></div>
+          </div>
+        </div>
+        <div class="card phone-mock">
+          <div class="phone-header">📍 TableBook</div>
+          <div class="phone-map">🗺️</div>
+          <div class="phone-item">🍴 Tashkent Grill &nbsp;·&nbsp; <span style="color:var(--green)">4 tables free</span></div>
+          <div class="phone-item">🥗 Green Garden &nbsp;·&nbsp; <span style="color:var(--green)">2 tables free</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="glow-bar"></div>
+  </div>
+
+  <!-- SLIDE 3 -->
+  <div class="slide bg-rest" id="s3">
+    <div class="overlay"></div>
+    <div class="content">
+      <div class="slide-title">😤 The Problem</div>
+      <div class="title-line"></div>
+      <div class="prob-grid">
+        <div class="card prob-card"><span class="em">📞</span> Phone booking is outdated</div>
+        <div class="card prob-card"><span class="em">🚫</span> Fake reservations are common</div>
+        <div class="card prob-card"><span class="em">👻</span> No-shows hurt restaurants</div>
+        <div class="card prob-card"><span class="em">🗑️</span> Food waste from unplanned orders</div>
+        <div class="card prob-card"><span class="em">⏰</span> No seats visible during peak hours</div>
+        <div class="card prob-card"><span class="em">🙈</span> No way to preview tables in advance</div>
+      </div>
+      <div class="prob-stat">📊 70% of Uzbekistan restaurants still use phone booking</div>
+    </div>
+    <div class="glow-bar"></div>
+  </div>
+
+  <!-- SLIDE 4 -->
+  <div class="slide bg-rest" id="s4">
+    <div class="overlay"></div>
+    <div class="content">
+      <div class="slide-title">✅ The Solution</div>
+      <div class="title-line"></div>
+      <div class="sol-grid">
+        <div class="card sol-card">
+          <div class="sol-emoji">📱</div>
+          <h3>Smart Booking</h3>
+          <p>Fast, easy, and fully digital — no calls needed.</p>
+        </div>
+        <div class="card sol-card">
+          <div class="sol-emoji">🪑</div>
+          <h3>Visual Tables</h3>
+          <p>See the restaurant floor plan before you go.</p>
+        </div>
+        <div class="card sol-card">
+          <div class="sol-emoji">🍜</div>
+          <h3>Pre-order</h3>
+          <p>Food ready the moment you arrive at your table.</p>
+        </div>
+        <div class="card sol-card">
+          <div class="sol-emoji">💰</div>
+          <h3>Deposit System</h3>
+          <p>Small deposit eliminates fake bookings entirely.</p>
+        </div>
+      </div>
+    </div>
+    <div class="glow-bar"></div>
+  </div>
+
+  <!-- SLIDE 5 -->
+  <div class="slide bg-rest" id="s5">
+    <div class="overlay"></div>
+    <div class="content">
+      <div class="slide-title">🏆 Why TableBook?</div>
+      <div class="title-line"></div>
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th>Platform</th>
+            <th>Visual tables</th>
+            <th>Pre-order</th>
+            <th>3 Languages</th>
+            <th>Local UZ</th>
+            <th>Map</th>
+            <th>Admin panel</th>
+            <th>Deposit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="highlight">
+            <td>TableBook</td>
+            <td><span class="ck">✅</span></td><td><span class="ck">✅</span></td><td><span class="ck">✅</span></td>
+            <td><span class="ck">✅</span></td><td><span class="ck">✅</span></td><td><span class="ck">✅</span></td><td><span class="ck">✅</span></td>
+          </tr>
+          <tr>
+            <td>OpenTable</td>
+            <td><span class="xk">✗</span></td><td><span class="xk">✗</span></td><td><span class="xk">✗</span></td>
+            <td><span class="xk">✗</span></td><td><span class="ck">✅</span></td><td><span class="ck">✅</span></td><td><span class="xk">✗</span></td>
+          </tr>
+          <tr>
+            <td>Resy</td>
+            <td><span class="xk">✗</span></td><td><span class="xk">✗</span></td><td><span class="xk">✗</span></td>
+            <td><span class="xk">✗</span></td><td><span class="xk">✗</span></td><td><span class="ck">✅</span></td><td><span class="xk">✗</span></td>
+          </tr>
+          <tr>
+            <td>Tock</td>
+            <td><span class="xk">✗</span></td><td><span class="ck">✅</span></td><td><span class="xk">✗</span></td>
+            <td><span class="xk">✗</span></td><td><span class="xk">✗</span></td><td><span class="ck">✅</span></td><td><span class="ck">✅</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="glow-bar"></div>
+  </div>
+
+  <!-- SLIDE 6 -->
+  <div class="slide bg-rest" id="s6">
+    <div class="overlay"></div>
+    <div class="content">
+      <div class="slide-title">⚙️ How TableBook Works</div>
+      <div class="title-line"></div>
+      <div class="flow-row">
+        <div class="card flow-card">
+          <div class="flow-emoji">🔍</div>
+          <h4>Open App</h4>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="card flow-card">
+          <div class="flow-emoji">🗺️</div>
+          <h4>Find Restaurant</h4>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="card flow-card">
+          <div class="flow-emoji">🪑</div>
+          <h4>Pick Table</h4>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="card flow-card">
+          <div class="flow-emoji">🍽️</div>
+          <h4>Pre-order Meal</h4>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="card flow-card">
+          <div class="flow-emoji">✅</div>
+          <h4>Confirm &amp; Deposit</h4>
+        </div>
+      </div>
+      <div class="flow-note">⏱️ The whole process takes under 2 minutes</div>
+    </div>
+    <div class="glow-bar"></div>
+  </div>
+
+  <!-- SLIDE 7 -->
+  <div class="slide bg-rest" id="s7">
+    <div class="overlay"></div>
+    <div class="content">
+      <div class="slide-title">💼 Business Model</div>
+      <div class="title-line"></div>
+      <div class="biz-grid">
+        <div class="card biz-card">
+          <div class="biz-num" data-count="5">0</div>
+          <div style="color:var(--green);font-size:22px;">%</div>
+          <div class="biz-label">💸 Commission</div>
+          <div class="biz-desc">Per booking from restaurants</div>
+        </div>
+        <div class="card biz-card">
+          <div class="biz-num">⭐</div>
+          <div class="biz-label">Premium Placement</div>
+          <div class="biz-desc">Featured restaurant spots in search</div>
+        </div>
+        <div class="card biz-card">
+          <div class="biz-num">📦</div>
+          <div class="biz-label">Subscription</div>
+          <div class="biz-desc">Monthly admin panel plan for restaurants</div>
+        </div>
+      </div>
+      <div class="biz-bottom">Scalable &nbsp;·&nbsp; Restaurant-friendly &nbsp;·&nbsp; Zero cost for users</div>
+    </div>
+    <div class="glow-bar"></div>
+  </div>
+
+  <!-- SLIDE 8 -->
+  <div class="slide bg-rest" id="s8">
+    <div class="overlay"></div>
+    <div class="content">
+      <div class="slide-title">🚀 What's Next</div>
+      <div class="title-line"></div>
+      <div class="road-row">
+        <div class="card road-card">
+          <div class="road-tag">2026 Q3</div>
+          <div class="road-emoji">📱</div>
+          <h4>Native iOS &amp; Android App</h4>
+        </div>
+        <div class="card road-card">
+          <div class="road-tag">2026 Q4</div>
+          <div class="road-emoji">💳</div>
+          <h4>Payme &amp; Click Payment Integration</h4>
+        </div>
+        <div class="card road-card">
+          <div class="road-tag">2027</div>
+          <div class="road-emoji">🤖</div>
+          <h4>AI-powered Table &amp; Meal Recommendations</h4>
+        </div>
+        <div class="card road-card">
+          <div class="road-tag">2027</div>
+          <div class="road-emoji">🌍</div>
+          <h4>Expand to Tashkent, Samarkand &amp; Beyond</h4>
+        </div>
+      </div>
+    </div>
+    <div class="glow-bar"></div>
+  </div>
+
+  <!-- SLIDE 9 -->
+  <div class="slide bg-nice" id="s9">
+    <div class="content">
+      <div class="ty-title">🙏 Thank You!</div>
+      <div class="ty-line"></div>
+      <a class="ty-link" href="https://table-b00k.vercel.app" target="_blank">table-b00k.vercel.app</a>
+      <div class="ty-built">Built with ❤️ for Uzbekistan</div>
+    </div>
+    <div class="s9-bottom">Hackathon 2026 &nbsp;|&nbsp; Jahongir Navruzov</div>
+    <div class="glow-bar"></div>
+  </div>
+
+  <!-- Controls -->
+  <div id="counter">1 / 9</div>
+  <div id="nav">
+    <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">←</button>
+    <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">→</button>
+  </div>
+</div>
+
+<script>
+let cur=0,total=9,busy=false;
+const slides=document.querySelectorAll('.slide');
+const counter=document.getElementById('counter');
+
+function show(idx){
+  if(busy)return;busy=true;
+  slides[cur].classList.remove('active');
+  slides[cur].classList.add('exit');
+  setTimeout(()=>{slides[cur].classList.remove('exit');},500);
+  cur=idx;
+  slides[cur].classList.add('active');
+  counter.textContent=(cur+1)+' / '+total;
+  triggerAnimations(cur);
+  setTimeout(()=>{busy=false;},520);
+}
+function changeSlide(dir){
+  let n=cur+dir;
+  if(n<0)n=total-1;
+  if(n>=total)n=0;
+  show(n);
+}
+
+// Count-up animation
+function countUp(el){
+  const target=parseInt(el.dataset.count||'0');
+  let v=0;const step=Math.ceil(target/30);
+  const iv=setInterval(()=>{v=Math.min(v+step,target);el.textContent=v;if(v>=target)clearInterval(iv);},40);
+}
+function triggerAnimations(idx){
+  // Count up slide 7
+  if(idx===6){
+    const el=document.querySelector('#s7 [data-count]');
+    if(el)countUp(el);
+  }
+}
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')changeSlide(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')changeSlide(-1);
+});
+
+// Init
+slides[0].classList.add('active');
+counter.textContent='1 / '+total;
+</script>
+</body>
+</html>
