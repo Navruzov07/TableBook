@@ -1,0 +1,46 @@
+[
+  {
+    "id": "karshi_001",
+    "name": "Karshi Delight",
+    "description": "Cozy place offering traditional Uzbek cuisine with a modern twist.",
+    "cuisine": ["Uzbek", "Mediterranean"],
+    "location": {"address": "12 Amir Timur Street", "city": "Karshi", "coordinates": [64.2929, 38.8039]},
+    "rating": 4.7,
+    "price_range": "$$",
+    "has_booking": true,
+    "image_url": "https://example.com/images/karshi_delight.jpg"
+  },
+  {
+    "id": "karshi_002",
+    "name": "Saffron Garden",
+    "description": "Fine dining with Persian‑style grills and aromatic saffron dishes.",
+    "cuisine": ["Persian", "Grill"],
+    "location": {"address": "5 Navoi Avenue", "city": "Karshi", "coordinates": [64.2971, 38.8025]},
+    "rating": 4.3,
+    "price_range": "$$$",
+    "has_booking": false,
+    "image_url": "https://example.com/images/saffron_garden.jpg"
+  },
+  {
+    "id": "karshi_003",
+    "name": "Vegan Corner",
+    "description": "Bright plant‑based café serving fresh salads, smoothies, and vegan pastries.",
+    "cuisine": ["Vegan", "Cafe"],
+    "location": {"address": "78 Bunyodkor Street", "city": "Karshi", "coordinates": [64.2850, 38.8090]},
+    "rating": 4.6,
+    "price_range": "$",
+    "has_booking": true,
+    "image_url": "https://example.com/images/vegan_corner.jpg"
+  },
+  {
+    "id": "karshi_004",
+    "name": "Sea Breeze",
+    "description": "Seafood restaurant specializing in grilled fish and local river delicacies.",
+    "cuisine": ["Seafood", "Grill"],
+    "location": {"address": "33 Riverbank Road", "city": "Karshi", "coordinates": [64.3005, 38.7952]},
+    "rating": 4.2,
+    "price_range": "$$",
+    "has_booking": false,
+    "image_url": "https://example.com/images/sea_breeze.jpg"
+  }
+]

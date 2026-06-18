@@ -1,438 +1,1535 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uz">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>TableBook — Hackathon 2026</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
-:root{
-  --green:#22c55e;--cyan:#06b6d4;--dark:#0a1a12;
-  --card:rgba(255,255,255,0.05);--border:rgba(255,255,255,0.1);
-}
-body{font-family:'Inter',sans-serif;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;overflow:hidden;}
-#stage{position:relative;width:1280px;height:720px;overflow:hidden;border-radius:12px;box-shadow:0 0 80px rgba(34,197,94,0.2);}
-.slide{position:absolute;inset:0;width:100%;height:100%;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity 0.5s ease,transform 0.5s ease;transform:translateY(24px);}
-.slide.active{opacity:1;pointer-events:all;transform:translateY(0);}
-.slide.exit{opacity:0;transform:translateY(-24px);}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TableBook — Onlayn Stol Bronlash Platformasi</title>
+  <meta name="description" content="TableBook — O'zbekistondagi restoranlarda stol bronlash uchun zamonaviy raqamli platforma." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* Backgrounds */
-.bg-nice{background:url('niceee.png') center/cover no-repeat;}
-.bg-rest{background:url('tbookbg.png') center/cover no-repeat;}
-.overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,26,18,0.92) 0%,rgba(10,26,18,0.78) 100%);}
+    :root {
+      --green: #00e676;
+      --green2: #00c853;
+      --teal: #1de9b6;
+      --blue: #448aff;
+      --purple: #7c4dff;
+      --orange: #ff6d00;
+      --pink: #f50057;
+      --yellow: #ffd740;
+      --bg: #050d1a;
+      --bg2: #0a1628;
+      --bg3: #0f2040;
+      --glass: rgba(255,255,255,0.04);
+      --glass-border: rgba(255,255,255,0.08);
+      --text: #e8f4f8;
+      --muted: rgba(232,244,248,0.5);
+    }
 
-/* Bottom glow bar */
-.glow-bar{position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--green),var(--cyan),var(--green));background-size:200%;animation:glowMove 3s linear infinite;}
-@keyframes glowMove{0%{background-position:0%}100%{background-position:200%}}
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      overflow: hidden;
+      user-select: none;
+    }
 
-/* Slide counter & nav */
-#counter{position:absolute;bottom:18px;right:72px;color:rgba(255,255,255,0.5);font-size:13px;font-weight:500;z-index:100;}
-#nav{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:12px;z-index:100;}
-.nav-btn{background:rgba(255,255,255,0.08);border:1px solid var(--border);color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
-.nav-btn:hover{background:var(--green);color:#000;}
+    /* ── CANVAS PARTICLES ── */
+    #particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 
-/* Common */
-.content{position:relative;z-index:2;padding:48px 60px;flex:1;display:flex;flex-direction:column;}
-.slide-title{font-size:36px;font-weight:800;color:#fff;margin-bottom:6px;letter-spacing:-0.5px;}
-.title-line{width:56px;height:3px;background:var(--green);border-radius:2px;margin-bottom:32px;}
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 24px;box-shadow:0 4px 24px rgba(0,0,0,0.3);}
+    /* ── PROGRESS BAR ── */
+    #progress-bar {
+      position: fixed; top: 0; left: 0; height: 3px;
+      background: linear-gradient(90deg, var(--green), var(--teal), var(--blue));
+      transition: width 0.5s ease;
+      z-index: 1000;
+      box-shadow: 0 0 12px var(--green);
+    }
 
-/* ── SLIDE 1 ── */
-#s1 .content{align-items:center;justify-content:center;text-align:center;}
-.s1-logo{font-size:96px;font-weight:900;color:#fff;letter-spacing:-4px;animation:fadeUp 0.8s ease forwards;}
-.s1-sub{font-size:22px;color:var(--green);font-weight:500;margin-top:12px;overflow:hidden;white-space:nowrap;border-right:3px solid var(--green);width:0;animation:typing 1.8s steps(44) 0.6s forwards,blink 0.8s step-end infinite 2.4s;}
-@keyframes typing{to{width:100%}}
-@keyframes blink{50%{border-color:transparent}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-.pills{display:flex;gap:14px;margin-top:28px;flex-wrap:wrap;justify-content:center;}
-.pill{background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.4);border-radius:999px;padding:8px 22px;color:#fff;font-size:15px;font-weight:600;animation:float 3s ease-in-out infinite;}
-.pill:nth-child(2){animation-delay:0.5s;}
-.pill:nth-child(3){animation-delay:1s;}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-.s1-bottom{position:absolute;bottom:28px;left:60px;font-size:13px;color:rgba(255,255,255,0.45);font-weight:400;}
+    /* ── NAV DOTS ── */
+    #nav-dots {
+      position: fixed; right: 28px; top: 50%; transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 10px; z-index: 999;
+    }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      border: 1.5px solid rgba(255,255,255,0.3);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .dot.active { background: var(--green); border-color: var(--green); box-shadow: 0 0 10px var(--green); transform: scale(1.4); }
 
-/* ── SLIDE 2 ── */
-.s2-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;flex:1;}
-.feat-cards{display:flex;flex-direction:column;gap:14px;}
-.feat-card{display:flex;align-items:flex-start;gap:14px;padding:18px 20px;}
-.feat-emoji{font-size:28px;flex-shrink:0;}
-.feat-card h3{font-size:16px;font-weight:700;color:#fff;margin-bottom:4px;}
-.feat-card p{font-size:13px;color:rgba(255,255,255,0.6);line-height:1.5;}
-.phone-mock{background:rgba(10,26,18,0.9);border:2px solid rgba(34,197,94,0.4);border-radius:28px;padding:16px;display:flex;flex-direction:column;gap:8px;height:100%;min-height:300px;}
-.phone-header{background:var(--green);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:#000;}
-.phone-map{background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.3);border-radius:10px;flex:1;display:flex;align-items:center;justify-content:center;font-size:28px;color:rgba(255,255,255,0.4);}
-.phone-item{background:rgba(255,255,255,0.07);border-radius:8px;padding:8px 12px;font-size:12px;color:rgba(255,255,255,0.7);display:flex;align-items:center;gap:8px;}
+    /* ── SLIDE COUNTER ── */
+    #slide-counter {
+      position: fixed; bottom: 24px; right: 36px;
+      font-size: 0.75rem; color: var(--muted);
+      font-weight: 600; letter-spacing: 2px;
+      z-index: 999;
+    }
 
-/* ── SLIDE 3 ── */
-.prob-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1;}
-.prob-card{border-left:3px solid #ef4444;padding:14px 18px;font-size:14px;color:rgba(255,255,255,0.85);display:flex;align-items:center;gap:10px;font-weight:500;}
-.prob-card span.em{font-size:22px;}
-.prob-stat{text-align:center;margin-top:16px;font-size:18px;font-weight:700;color:var(--green);}
+    /* ── ARROW NAVIGATION ── */
+    .nav-arrow {
+      position: fixed; top: 50%; transform: translateY(-50%);
+      width: 46px; height: 46px; border-radius: 50%;
+      background: var(--glass); border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 999;
+      color: var(--text); font-size: 1.2rem;
+      transition: all 0.3s ease;
+    }
+    .nav-arrow:hover { background: rgba(0,230,118,0.15); border-color: var(--green); color: var(--green); }
+    #prev-btn { left: 20px; }
+    #next-btn { right: 56px; }
 
-/* ── SLIDE 4 ── */
-.sol-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;}
-.sol-card{padding:24px;display:flex;flex-direction:column;gap:8px;}
-.sol-emoji{font-size:36px;}
-.sol-card h3{font-size:17px;font-weight:700;color:#fff;}
-.sol-card p{font-size:13px;color:rgba(255,255,255,0.6);line-height:1.5;}
+    /* ── SLIDES WRAPPER ── */
+    #slides-wrapper {
+      position: relative; z-index: 10;
+      width: 100%; height: 100vh;
+      overflow: hidden;
+    }
 
-/* ── SLIDE 5 ── */
-.comp-table{width:100%;border-collapse:collapse;flex:1;}
-.comp-table th{font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);padding:8px 12px;text-align:center;border-bottom:1px solid var(--border);}
-.comp-table th:first-child{text-align:left;}
-.comp-table td{padding:10px 12px;font-size:13px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.05);}
-.comp-table td:first-child{text-align:left;font-weight:600;color:#fff;}
-.comp-table tr.highlight{background:rgba(34,197,94,0.08);border-left:3px solid var(--green);}
-.comp-table tr.highlight td:first-child{color:var(--green);}
-.ck{color:var(--green);font-size:18px;}
-.xk{color:#ef4444;font-size:18px;}
+    /* ── SLIDE ── */
+    .slide {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      padding: 60px 80px;
+      opacity: 0;
+      transform: translateX(80px);
+      transition: opacity 0.6s cubic-bezier(.4,0,.2,1), transform 0.6s cubic-bezier(.4,0,.2,1);
+      pointer-events: none;
+    }
+    .slide.active {
+      opacity: 1; transform: translateX(0);
+      pointer-events: all;
+    }
+    .slide.exit {
+      opacity: 0; transform: translateX(-80px);
+    }
+    .slide-inner {
+      width: 100%; max-width: 1100px;
+      text-align: center;
+    }
 
-/* ── SLIDE 6 ── */
-.flow-row{display:flex;align-items:center;gap:0;flex:1;margin-top:12px;}
-.flow-card{flex:1;padding:22px 14px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;}
-.flow-emoji{font-size:34px;}
-.flow-card h4{font-size:13px;font-weight:700;color:#fff;}
-.flow-arrow{font-size:22px;color:var(--green);animation:pulse 1.5s ease-in-out infinite;flex-shrink:0;}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.85)}}
-.flow-note{text-align:center;font-size:13px;color:rgba(255,255,255,0.5);margin-top:16px;font-style:italic;}
+    /* ── TYPOGRAPHY ── */
+    .label {
+      display: inline-block;
+      padding: 6px 18px; border-radius: 999px;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+      background: rgba(0,230,118,0.12);
+      border: 1px solid rgba(0,230,118,0.3);
+      color: var(--green); margin-bottom: 20px;
+    }
+    h1.hero-title {
+      font-size: clamp(3rem, 7vw, 6rem);
+      font-weight: 900; line-height: 1.05;
+      background: linear-gradient(135deg, #fff 30%, var(--green) 60%, var(--teal) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; margin-bottom: 20px;
+    }
+    h2.slide-title {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.2; margin-bottom: 16px;
+      background: linear-gradient(135deg, #fff 40%, var(--teal));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.35rem);
+      color: var(--muted); max-width: 700px; margin: 0 auto 36px;
+      font-weight: 400; line-height: 1.7;
+    }
+    .slide-sub {
+      font-size: 1.05rem; color: var(--muted);
+      max-width: 680px; margin: 0 auto 32px; line-height: 1.7;
+    }
 
-/* ── SLIDE 7 ── */
-.biz-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;flex:1;}
-.biz-card{padding:28px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;}
-.biz-num{font-size:48px;font-weight:900;color:var(--green);line-height:1;}
-.biz-label{font-size:14px;font-weight:600;color:#fff;}
-.biz-desc{font-size:12px;color:rgba(255,255,255,0.5);}
-.biz-bottom{text-align:center;margin-top:16px;font-size:14px;color:rgba(255,255,255,0.6);font-weight:500;}
+    /* ── GLASSMORPHISM CARD ── */
+    .glass-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      backdrop-filter: blur(16px);
+      padding: 28px 24px;
+      transition: all 0.35s ease;
+    }
+    .glass-card:hover {
+      background: rgba(255,255,255,0.07);
+      border-color: rgba(0,230,118,0.3);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
 
-/* ── SLIDE 8 ── */
-.road-row{display:flex;gap:16px;flex:1;align-items:stretch;}
-.road-card{flex:1;padding:22px 18px;border-top:3px solid var(--green);display:flex;flex-direction:column;gap:10px;}
-.road-tag{font-size:11px;font-weight:700;color:var(--cyan);background:rgba(6,182,212,0.12);border-radius:999px;padding:3px 10px;width:fit-content;}
-.road-emoji{font-size:30px;}
-.road-card h4{font-size:14px;font-weight:700;color:#fff;line-height:1.4;}
+    /* ── GRID LAYOUTS ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 
-/* ── SLIDE 9 ── */
-#s9 .content{align-items:center;justify-content:center;text-align:center;}
-.ty-title{font-size:80px;font-weight:900;color:#fff;}
-.ty-line{width:80px;height:3px;background:var(--green);border-radius:2px;margin:16px auto;animation:expandLine 1s ease 0.5s both;}
-@keyframes expandLine{from{width:0}to{width:80px}}
-.ty-link{font-size:24px;font-weight:700;color:var(--green);text-shadow:0 0 20px rgba(34,197,94,0.6);margin-top:12px;text-decoration:none;}
-.ty-built{font-size:13px;color:rgba(255,255,255,0.4);margin-top:14px;}
-.s9-bottom{position:absolute;bottom:28px;left:60px;font-size:13px;color:rgba(255,255,255,0.45);}
-</style>
+    /* ── FEATURE CARD ── */
+    .feat-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      padding: 24px 18px;
+      text-align: left;
+      transition: all 0.3s ease;
+    }
+    .feat-card:hover {
+      border-color: rgba(0,230,118,0.35);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+    }
+    .feat-icon {
+      font-size: 2rem; margin-bottom: 12px; display: block;
+    }
+    .feat-title {
+      font-size: 0.95rem; font-weight: 700; margin-bottom: 6px;
+      color: #fff;
+    }
+    .feat-desc {
+      font-size: 0.78rem; color: var(--muted); line-height: 1.6;
+    }
+
+    /* ── STAT CARDS ── */
+    .stat-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px; padding: 28px 20px;
+      text-align: center;
+    }
+    .stat-num {
+      font-size: 2.8rem; font-weight: 900; line-height: 1;
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; margin-bottom: 8px;
+    }
+    .stat-label { font-size: 0.82rem; color: var(--muted); font-weight: 600; }
+
+    /* ── STEP CARDS ── */
+    .step-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px; padding: 28px 20px;
+      position: relative; text-align: left;
+    }
+    .step-num {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 1rem; color: #000;
+      margin-bottom: 14px;
+    }
+    .step-title { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+    .step-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── TECH BADGE ── */
+    .tech-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 18px; border-radius: 12px;
+      background: var(--glass); border: 1px solid var(--glass-border);
+      font-size: 0.82rem; font-weight: 600;
+      transition: all 0.3s;
+    }
+    .tech-badge:hover { border-color: var(--teal); transform: scale(1.04); }
+
+    /* ── COMPARISON TABLE ── */
+    .comp-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    .comp-table th {
+      padding: 14px 16px; text-align: center;
+      font-weight: 700; font-size: 0.85rem;
+      border-bottom: 2px solid var(--glass-border);
+      color: var(--green);
+    }
+    .comp-table th:first-child { text-align: left; color: var(--muted); }
+    .comp-table td {
+      padding: 12px 16px; text-align: center;
+      border-bottom: 1px solid var(--glass-border);
+      transition: background 0.2s;
+    }
+    .comp-table td:first-child { text-align: left; font-weight: 600; color: var(--text); }
+    .comp-table tr:hover td { background: rgba(255,255,255,0.03); }
+    .comp-table .our-col { background: rgba(0,230,118,0.06); }
+    .comp-table th.our-col { color: var(--green); font-size: 0.9rem; }
+    .check { color: var(--green); font-size: 1.1rem; }
+    .cross { color: rgba(255,255,255,0.2); font-size: 1.1rem; }
+    .partial { color: var(--yellow); font-size: 1.1rem; }
+
+    /* ── ROLE CARD ── */
+    .role-card {
+      border-radius: 20px; padding: 28px 22px; text-align: left;
+      border: 1px solid transparent; position: relative; overflow: hidden;
+    }
+    .role-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: var(--glass); border-radius: inherit;
+    }
+    .role-card-inner { position: relative; z-index: 1; }
+    .role-icon { font-size: 2.2rem; margin-bottom: 14px; display: block; }
+    .role-title { font-size: 1.05rem; font-weight: 800; margin-bottom: 10px; }
+    .role-list { list-style: none; }
+    .role-list li {
+      font-size: 0.78rem; color: var(--muted); padding: 4px 0;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .role-list li::before { content: '→'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+
+    /* ── ROADMAP ── */
+    .roadmap-item {
+      display: flex; gap: 16px; align-items: flex-start;
+      text-align: left;
+    }
+    .roadmap-dot {
+      width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+      margin-top: 4px;
+    }
+    .roadmap-line {
+      display: flex; flex-direction: column; gap: 20px;
+      position: relative; padding-left: 10px;
+    }
+    .roadmap-line::before {
+      content: ''; position: absolute; left: 16px; top: 8px;
+      width: 2px; height: calc(100% - 16px);
+      background: var(--glass-border);
+    }
+
+    /* ── PROBLEM CARDS ── */
+    .problem-card {
+      background: rgba(255, 59, 48, 0.06);
+      border: 1px solid rgba(255, 59, 48, 0.2);
+      border-radius: 16px; padding: 22px 18px; text-align: left;
+    }
+    .problem-icon { font-size: 1.8rem; margin-bottom: 10px; display: block; }
+    .problem-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 5px; color: #ff6b6b; }
+    .problem-desc { font-size: 0.77rem; color: var(--muted); line-height: 1.55; }
+
+    /* ── SOLUTION CARD ── */
+    .solution-card {
+      background: rgba(0,230,118,0.06);
+      border: 1px solid rgba(0,230,118,0.2);
+      border-radius: 16px; padding: 22px 18px; text-align: left;
+    }
+    .solution-icon { font-size: 1.8rem; margin-bottom: 10px; display: block; }
+    .solution-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 5px; color: var(--green); }
+    .solution-desc { font-size: 0.77rem; color: var(--muted); line-height: 1.55; }
+
+    /* ── BIG NUMBER ── */
+    .big-num {
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 900;
+    }
+
+    /* ── GLOW BUTTON ── */
+    .glow-btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 36px; border-radius: 999px; border: none; cursor: pointer;
+      font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      color: #000;
+      box-shadow: 0 0 30px rgba(0,230,118,0.4);
+      transition: all 0.3s ease;
+    }
+    .glow-btn:hover { transform: scale(1.05); box-shadow: 0 0 50px rgba(0,230,118,0.7); }
+
+    .outline-btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 13px 32px; border-radius: 999px; border: 2px solid rgba(255,255,255,0.2); cursor: pointer;
+      font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700;
+      background: transparent; color: var(--text);
+      transition: all 0.3s ease;
+    }
+    .outline-btn:hover { border-color: var(--green); color: var(--green); }
+
+    /* ── ARCH BOX ── */
+    .arch-box {
+      border-radius: 14px; padding: 16px 20px; text-align: center;
+      font-size: 0.82rem; font-weight: 700;
+    }
+    .arch-arrow { color: var(--muted); font-size: 1.5rem; align-self: center; }
+
+    /* ── SLIDE 1 HERO SPECIAL ── */
+    .hero-logo {
+      display: inline-flex; align-items: center; gap: 16px;
+      margin-bottom: 28px;
+    }
+    .logo-icon {
+      width: 72px; height: 72px; border-radius: 20px;
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem;
+      box-shadow: 0 0 40px rgba(0,230,118,0.4);
+    }
+    .logo-text {
+      font-size: 3.2rem; font-weight: 900;
+      background: linear-gradient(135deg, #fff, var(--green));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── FLOATING TAG ── */
+    .float-tag {
+      position: absolute;
+      background: var(--glass); border: 1px solid var(--glass-border);
+      backdrop-filter: blur(12px); border-radius: 12px;
+      padding: 10px 16px; font-size: 0.78rem; font-weight: 600;
+      display: flex; align-items: center; gap: 8px;
+      animation: floatAnim 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes floatAnim {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* ── MARKET CARD ── */
+    .market-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px; padding: 26px 22px;
+    }
+    .market-bar {
+      height: 8px; border-radius: 999px; margin-top: 10px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+    }
+    .market-bar-fill {
+      height: 100%; border-radius: inherit;
+      background: linear-gradient(90deg, var(--green), var(--teal));
+      animation: barGrow 1.5s ease forwards;
+      width: 0;
+    }
+    @keyframes barGrow { to { width: var(--w); } }
+
+    /* ── TEAM CARD ── */
+    .team-card {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 20px; padding: 28px 20px; text-align: center;
+    }
+    .team-avatar {
+      width: 70px; height: 70px; border-radius: 50%;
+      margin: 0 auto 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      border: 2px solid rgba(0,230,118,0.4);
+    }
+    .team-name { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+    .team-role { font-size: 0.77rem; color: var(--green); font-weight: 600; margin-bottom: 8px; }
+    .team-desc { font-size: 0.74rem; color: var(--muted); line-height: 1.55; }
+
+    /* ── MOBILE BADGE ── */
+    .mobile-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 16px; border-radius: 999px;
+      background: rgba(68,138,255,0.12);
+      border: 1px solid rgba(68,138,255,0.3);
+      color: #90caf9; font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+
+    /* ── ANIMATE CLASSES ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .slide.active .animate-1 { animation: fadeUp 0.5s 0.1s both; }
+    .slide.active .animate-2 { animation: fadeUp 0.5s 0.2s both; }
+    .slide.active .animate-3 { animation: fadeUp 0.5s 0.3s both; }
+    .slide.active .animate-4 { animation: fadeUp 0.5s 0.4s both; }
+    .slide.active .animate-5 { animation: fadeUp 0.5s 0.5s both; }
+    .slide.active .animate-6 { animation: fadeUp 0.5s 0.6s both; }
+
+    /* ── SLIDE HEADER ── */
+    .slide-header {
+      margin-bottom: 32px;
+    }
+
+    /* ── KEYBOARD HINT ── */
+    #key-hint {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      font-size: 0.7rem; color: var(--muted); letter-spacing: 1px;
+      display: flex; gap: 10px; align-items: center;
+      z-index: 999;
+    }
+    .key { background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 6px; padding: 3px 8px; font-size: 0.65rem; font-weight: 600; }
+
+    /* ── SLIDE-SPECIFIC BG ACCENTS ── */
+    .bg-accent-green { background: radial-gradient(ellipse at 50% 50%, rgba(0,230,118,0.08) 0%, transparent 70%); }
+    .bg-accent-blue  { background: radial-gradient(ellipse at 50% 50%, rgba(68,138,255,0.08) 0%, transparent 70%); }
+    .bg-accent-purple{ background: radial-gradient(ellipse at 50% 50%, rgba(124,77,255,0.08) 0%, transparent 70%); }
+    .bg-accent-teal  { background: radial-gradient(ellipse at 50% 50%, rgba(29,233,182,0.08) 0%, transparent 70%); }
+    .bg-accent-orange{ background: radial-gradient(ellipse at 50% 50%, rgba(255,109,0,0.08) 0%, transparent 70%); }
+    .bg-accent-red   { background: radial-gradient(ellipse at 50% 50%, rgba(245,0,87,0.06) 0%, transparent 70%); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      width: 60px; height: 3px; border-radius: 999px; margin: 0 auto 24px;
+      background: linear-gradient(90deg, var(--green), var(--teal));
+    }
+
+    /* ── HIGHLIGHT ── */
+    .hl { color: var(--green); }
+    .hl-teal { color: var(--teal); }
+    .hl-blue { color: var(--blue); }
+    .hl-yellow { color: var(--yellow); }
+
+    /* scrollbar hide */
+    ::-webkit-scrollbar { display: none; }
+
+    /* ── PULSE DOT ── */
+    .pulse {
+      display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 0 rgba(0,230,118,0.4);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(0,230,118,0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(0,230,118,0); }
+      100% { box-shadow: 0 0 0 0 rgba(0,230,118,0); }
+    }
+
+    /* ── TABLE WRAPPER ── */
+    .table-wrapper {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 20px; overflow: hidden;
+    }
+
+    /* ── GRADIENT TEXT HELPER ── */
+    .grad-green { background: linear-gradient(135deg, var(--green), var(--teal)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .grad-blue  { background: linear-gradient(135deg, var(--blue), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .grad-orange{ background: linear-gradient(135deg, var(--yellow), var(--orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+  </style>
 </head>
 <body>
-<div id="stage">
 
-  <!-- SLIDE 1 -->
-  <div class="slide bg-nice" id="s1">
-    <div class="content">
-      <div class="s1-logo">TableBook</div>
-      <div class="s1-sub">The next generation of restaurant booking</div>
-      <div class="pills">
-        <div class="pill">🗺️ Find</div>
-        <div class="pill">🪑 Book</div>
-        <div class="pill">🍽️ Pre-order</div>
-      </div>
-    </div>
-    <div class="s1-bottom">Hackathon 2026 &nbsp;|&nbsp; Jahongir Navruzov</div>
-    <div class="glow-bar"></div>
-  </div>
+<!-- Particles Canvas -->
+<canvas id="particles"></canvas>
 
-  <!-- SLIDE 2 -->
-  <div class="slide bg-rest" id="s2">
-    <div class="overlay"></div>
-    <div class="content">
-      <div class="slide-title">📌 What is TableBook?</div>
-      <div class="title-line"></div>
-      <div class="s2-grid">
-        <div class="feat-cards">
-          <div class="card feat-card">
-            <div class="feat-emoji">🪑</div>
-            <div><h3>Visual Table Selection</h3><p>Pick your exact seat before arriving at the restaurant.</p></div>
-          </div>
-          <div class="card feat-card">
-            <div class="feat-emoji">🍽️</div>
-            <div><h3>Pre-order Food</h3><p>Order your meal in advance — food ready when you arrive.</p></div>
-          </div>
-          <div class="card feat-card">
-            <div class="feat-emoji">🗺️</div>
-            <div><h3>Map Discovery</h3><p>Find nearby restaurants instantly on an interactive map.</p></div>
-          </div>
-        </div>
-        <div class="card phone-mock">
-          <div class="phone-header">📍 TableBook</div>
-          <div class="phone-map">🗺️</div>
-          <div class="phone-item">🍴 Tashkent Grill &nbsp;·&nbsp; <span style="color:var(--green)">4 tables free</span></div>
-          <div class="phone-item">🥗 Green Garden &nbsp;·&nbsp; <span style="color:var(--green)">2 tables free</span></div>
-        </div>
-      </div>
-    </div>
-    <div class="glow-bar"></div>
-  </div>
+<!-- Progress Bar -->
+<div id="progress-bar"></div>
 
-  <!-- SLIDE 3 -->
-  <div class="slide bg-rest" id="s3">
-    <div class="overlay"></div>
-    <div class="content">
-      <div class="slide-title">😤 The Problem</div>
-      <div class="title-line"></div>
-      <div class="prob-grid">
-        <div class="card prob-card"><span class="em">📞</span> Phone booking is outdated</div>
-        <div class="card prob-card"><span class="em">🚫</span> Fake reservations are common</div>
-        <div class="card prob-card"><span class="em">👻</span> No-shows hurt restaurants</div>
-        <div class="card prob-card"><span class="em">🗑️</span> Food waste from unplanned orders</div>
-        <div class="card prob-card"><span class="em">⏰</span> No seats visible during peak hours</div>
-        <div class="card prob-card"><span class="em">🙈</span> No way to preview tables in advance</div>
-      </div>
-      <div class="prob-stat">📊 70% of Uzbekistan restaurants still use phone booking</div>
-    </div>
-    <div class="glow-bar"></div>
-  </div>
+<!-- Navigation Dots -->
+<div id="nav-dots"></div>
 
-  <!-- SLIDE 4 -->
-  <div class="slide bg-rest" id="s4">
-    <div class="overlay"></div>
-    <div class="content">
-      <div class="slide-title">✅ The Solution</div>
-      <div class="title-line"></div>
-      <div class="sol-grid">
-        <div class="card sol-card">
-          <div class="sol-emoji">📱</div>
-          <h3>Smart Booking</h3>
-          <p>Fast, easy, and fully digital — no calls needed.</p>
-        </div>
-        <div class="card sol-card">
-          <div class="sol-emoji">🪑</div>
-          <h3>Visual Tables</h3>
-          <p>See the restaurant floor plan before you go.</p>
-        </div>
-        <div class="card sol-card">
-          <div class="sol-emoji">🍜</div>
-          <h3>Pre-order</h3>
-          <p>Food ready the moment you arrive at your table.</p>
-        </div>
-        <div class="card sol-card">
-          <div class="sol-emoji">💰</div>
-          <h3>Deposit System</h3>
-          <p>Small deposit eliminates fake bookings entirely.</p>
-        </div>
-      </div>
-    </div>
-    <div class="glow-bar"></div>
-  </div>
+<!-- Slide Counter -->
+<div id="slide-counter">01 / 14</div>
 
-  <!-- SLIDE 5 -->
-  <div class="slide bg-rest" id="s5">
-    <div class="overlay"></div>
-    <div class="content">
-      <div class="slide-title">🏆 Why TableBook?</div>
-      <div class="title-line"></div>
-      <table class="comp-table">
-        <thead>
-          <tr>
-            <th>Platform</th>
-            <th>Visual tables</th>
-            <th>Pre-order</th>
-            <th>3 Languages</th>
-            <th>Local UZ</th>
-            <th>Map</th>
-            <th>Admin panel</th>
-            <th>Deposit</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="highlight">
-            <td>TableBook</td>
-            <td><span class="ck">✅</span></td><td><span class="ck">✅</span></td><td><span class="ck">✅</span></td>
-            <td><span class="ck">✅</span></td><td><span class="ck">✅</span></td><td><span class="ck">✅</span></td><td><span class="ck">✅</span></td>
-          </tr>
-          <tr>
-            <td>OpenTable</td>
-            <td><span class="xk">✗</span></td><td><span class="xk">✗</span></td><td><span class="xk">✗</span></td>
-            <td><span class="xk">✗</span></td><td><span class="ck">✅</span></td><td><span class="ck">✅</span></td><td><span class="xk">✗</span></td>
-          </tr>
-          <tr>
-            <td>Resy</td>
-            <td><span class="xk">✗</span></td><td><span class="xk">✗</span></td><td><span class="xk">✗</span></td>
-            <td><span class="xk">✗</span></td><td><span class="xk">✗</span></td><td><span class="ck">✅</span></td><td><span class="xk">✗</span></td>
-          </tr>
-          <tr>
-            <td>Tock</td>
-            <td><span class="xk">✗</span></td><td><span class="ck">✅</span></td><td><span class="xk">✗</span></td>
-            <td><span class="xk">✗</span></td><td><span class="xk">✗</span></td><td><span class="ck">✅</span></td><td><span class="ck">✅</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="glow-bar"></div>
-  </div>
+<!-- Arrow Buttons -->
+<button class="nav-arrow" id="prev-btn" title="Oldingi slayd">&#8592;</button>
+<button class="nav-arrow" id="next-btn" title="Keyingi slayd">&#8594;</button>
 
-  <!-- SLIDE 6 -->
-  <div class="slide bg-rest" id="s6">
-    <div class="overlay"></div>
-    <div class="content">
-      <div class="slide-title">⚙️ How TableBook Works</div>
-      <div class="title-line"></div>
-      <div class="flow-row">
-        <div class="card flow-card">
-          <div class="flow-emoji">🔍</div>
-          <h4>Open App</h4>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="card flow-card">
-          <div class="flow-emoji">🗺️</div>
-          <h4>Find Restaurant</h4>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="card flow-card">
-          <div class="flow-emoji">🪑</div>
-          <h4>Pick Table</h4>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="card flow-card">
-          <div class="flow-emoji">🍽️</div>
-          <h4>Pre-order Meal</h4>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="card flow-card">
-          <div class="flow-emoji">✅</div>
-          <h4>Confirm &amp; Deposit</h4>
-        </div>
-      </div>
-      <div class="flow-note">⏱️ The whole process takes under 2 minutes</div>
-    </div>
-    <div class="glow-bar"></div>
-  </div>
-
-  <!-- SLIDE 7 -->
-  <div class="slide bg-rest" id="s7">
-    <div class="overlay"></div>
-    <div class="content">
-      <div class="slide-title">💼 Business Model</div>
-      <div class="title-line"></div>
-      <div class="biz-grid">
-        <div class="card biz-card">
-          <div class="biz-num" data-count="5">0</div>
-          <div style="color:var(--green);font-size:22px;">%</div>
-          <div class="biz-label">💸 Commission</div>
-          <div class="biz-desc">Per booking from restaurants</div>
-        </div>
-        <div class="card biz-card">
-          <div class="biz-num">⭐</div>
-          <div class="biz-label">Premium Placement</div>
-          <div class="biz-desc">Featured restaurant spots in search</div>
-        </div>
-        <div class="card biz-card">
-          <div class="biz-num">📦</div>
-          <div class="biz-label">Subscription</div>
-          <div class="biz-desc">Monthly admin panel plan for restaurants</div>
-        </div>
-      </div>
-      <div class="biz-bottom">Scalable &nbsp;·&nbsp; Restaurant-friendly &nbsp;·&nbsp; Zero cost for users</div>
-    </div>
-    <div class="glow-bar"></div>
-  </div>
-
-  <!-- SLIDE 8 -->
-  <div class="slide bg-rest" id="s8">
-    <div class="overlay"></div>
-    <div class="content">
-      <div class="slide-title">🚀 What's Next</div>
-      <div class="title-line"></div>
-      <div class="road-row">
-        <div class="card road-card">
-          <div class="road-tag">2026 Q3</div>
-          <div class="road-emoji">📱</div>
-          <h4>Native iOS &amp; Android App</h4>
-        </div>
-        <div class="card road-card">
-          <div class="road-tag">2026 Q4</div>
-          <div class="road-emoji">💳</div>
-          <h4>Payme &amp; Click Payment Integration</h4>
-        </div>
-        <div class="card road-card">
-          <div class="road-tag">2027</div>
-          <div class="road-emoji">🤖</div>
-          <h4>AI-powered Table &amp; Meal Recommendations</h4>
-        </div>
-        <div class="card road-card">
-          <div class="road-tag">2027</div>
-          <div class="road-emoji">🌍</div>
-          <h4>Expand to Tashkent, Samarkand &amp; Beyond</h4>
-        </div>
-      </div>
-    </div>
-    <div class="glow-bar"></div>
-  </div>
-
-  <!-- SLIDE 9 -->
-  <div class="slide bg-nice" id="s9">
-    <div class="content">
-      <div class="ty-title">🙏 Thank You!</div>
-      <div class="ty-line"></div>
-      <a class="ty-link" href="https://table-b00k.vercel.app" target="_blank">table-b00k.vercel.app</a>
-      <div class="ty-built">Built with ❤️ for Uzbekistan</div>
-    </div>
-    <div class="s9-bottom">Hackathon 2026 &nbsp;|&nbsp; Jahongir Navruzov</div>
-    <div class="glow-bar"></div>
-  </div>
-
-  <!-- Controls -->
-  <div id="counter">1 / 9</div>
-  <div id="nav">
-    <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">←</button>
-    <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">→</button>
-  </div>
+<!-- Keyboard Hint -->
+<div id="key-hint">
+  <span class="key">←</span> Oldingi
+  <span style="margin:0 4px">·</span>
+  <span class="key">→</span> Keyingi
+  <span style="margin:0 4px">·</span>
+  <span class="key">Space</span> Oldinga
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════
+     SLIDES
+═══════════════════════════════════════════════════════════ -->
+<div id="slides-wrapper">
+
+  <!-- ── SLIDE 1: HERO ── -->
+  <div class="slide bg-accent-green" id="slide-1">
+    <div class="slide-inner" style="position:relative">
+
+      <!-- Floating badges -->
+      <div class="float-tag" style="top:5%;left:0%;animation-delay:0s">
+        🗺️ <span>Google Maps bilan</span>
+      </div>
+      <div class="float-tag" style="top:5%;right:2%;animation-delay:1.5s">
+        📱 <span>Mobil ilova ham bor!</span>
+      </div>
+      <div class="float-tag" style="bottom:12%;left:2%;animation-delay:0.8s">
+        🔒 <span>Xavfsiz to'lov</span>
+      </div>
+      <div class="float-tag" style="bottom:12%;right:0%;animation-delay:2s">
+        ⭐ <span>Reyting tizimi</span>
+      </div>
+
+      <div class="animate-1">
+        <div class="hero-logo" style="justify-content:center">
+          <div class="logo-icon">🍽️</div>
+          <span class="logo-text">TableBook</span>
+        </div>
+      </div>
+
+      <div class="animate-2">
+        <h1 class="hero-title">
+          Restoranda stol<br/>bronlash — yangicha!
+        </h1>
+      </div>
+
+      <div class="animate-3">
+        <p class="hero-sub">
+          O'zbekistondagi restoranlar uchun <span class="hl">zamonaviy raqamli platforma</span> —
+          online bron qiling, xaritada toping, real vaqtda tasdiqlang.
+        </p>
+      </div>
+
+      <div class="animate-4" style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+        <div class="mobile-badge">✦ Hackathon Loyihasi 2025</div>
+        <div class="mobile-badge" style="background:rgba(29,233,182,0.1);border-color:rgba(29,233,182,0.3);color:#80cbc4">📱 iOS & Android</div>
+        <div class="mobile-badge" style="background:rgba(255,215,64,0.1);border-color:rgba(255,215,64,0.3);color:#ffd740">🇺🇿 O'zbekiston uchun</div>
+      </div>
+
+      <div class="animate-5" style="margin-top:36px;display:flex;gap:40px;justify-content:center">
+        <div style="text-align:center">
+          <div class="big-num grad-green">3</div>
+          <div style="font-size:0.78rem;color:var(--muted)">Foydalanuvchi roli</div>
+        </div>
+        <div style="text-align:center">
+          <div class="big-num grad-blue">∞</div>
+          <div style="font-size:0.78rem;color:var(--muted)">Restoranlar soni</div>
+        </div>
+        <div style="text-align:center">
+          <div class="big-num grad-orange">24/7</div>
+          <div style="font-size:0.78rem;color:var(--muted)">Online ishlaydi</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── SLIDE 2: MUAMMO ── -->
+  <div class="slide bg-accent-red" id="slide-2">
+    <div class="slide-inner">
+      <div class="slide-header animate-1">
+        <div class="label">😤 Muammo</div>
+        <h2 class="slide-title">Bugungi kun muammolari</h2>
+        <div class="divider"></div>
+        <p class="slide-sub">O'zbekistondagi restoranlar hali ham <span style="color:#ff6b6b">qog'oz va telefon</span> orqali bron qilishga tayanamoqda</p>
+      </div>
+      <div class="grid-3 animate-2">
+        <div class="problem-card">
+          <span class="problem-icon">📞</span>
+          <div class="problem-title">Telefon orqali bron</div>
+          <div class="problem-desc">Mijozlar stol band qilish uchun uzoq vaqt kutib turadi. Telefon band yoki javob yo'q.</div>
+        </div>
+        <div class="problem-card">
+          <span class="problem-icon">📋</span>
+          <div class="problem-title">Qog'oz jurnallar</div>
+          <div class="problem-desc">Restoranlar hali ham qo'lda yoziladigan bronlar kitobini ishlatadi. Xatoliklar ko'p bo'ladi.</div>
+        </div>
+        <div class="problem-card">
+          <span class="problem-icon">😡</span>
+          <div class="problem-title">Ikkita bron</div>
+          <div class="problem-desc">Bir stol bir vaqtda ikki kishi tomonidan bronlanib qoladi. Bu janjallarga olib keladi.</div>
+        </div>
+        <div class="problem-card">
+          <span class="problem-icon">🚶</span>
+          <div class="problem-title">Restoran topish qiyin</div>
+          <div class="problem-desc">Yangi mijozlar qaysi restoran bo'sh ekanini bilmaydi. Vaqt yo'qotiladi.</div>
+        </div>
+        <div class="problem-card">
+          <span class="problem-icon">💸</span>
+          <div class="problem-title">No-show zararlar</div>
+          <div class="problem-desc">Bron qilib kelmagan mijozlar tufayli restoranlar katta daromad yo'qotadi.</div>
+        </div>
+        <div class="problem-card">
+          <span class="problem-icon">📊</span>
+          <div class="problem-title">Tahlil yo'q</div>
+          <div class="problem-desc">Restoran egasi qaysi vaqt band, qaysi stol mashhur ekanini bilolmaydi.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 3: YECHIM ── -->
+  <div class="slide bg-accent-green" id="slide-3">
+    <div class="slide-inner">
+      <div class="slide-header animate-1">
+        <div class="label">✅ Yechim</div>
+        <h2 class="slide-title">TableBook — barcha muammoga<br/>bitta yechim</h2>
+        <div class="divider"></div>
+      </div>
+      <div class="grid-3 animate-2">
+        <div class="solution-card">
+          <span class="solution-icon">⚡</span>
+          <div class="solution-title">Bir daqiqada bron</div>
+          <div class="solution-desc">Mijoz 60 soniya ichida stol tanlab, vaqt belgilab, bronni tasdiqlaydi.</div>
+        </div>
+        <div class="solution-card">
+          <span class="solution-icon">🗺️</span>
+          <div class="solution-title">Interaktiv xarita</div>
+          <div class="solution-desc">Google Maps orqali yaqinidagi restoranlarni real vaqtda topadi.</div>
+        </div>
+        <div class="solution-card">
+          <span class="solution-icon">🔄</span>
+          <div class="solution-title">Real-time sinxron</div>
+          <div class="solution-desc">Stol bron qilinganda darhol tizimda yangilanadi. Ikkilik bronlar yo'q.</div>
+        </div>
+        <div class="solution-card">
+          <span class="solution-icon">💳</span>
+          <div class="solution-title">Depozit tizimi</div>
+          <div class="solution-desc">No-show muammosi hal qilindi. Bron bekor qilinsa, pul qaytariladi.</div>
+        </div>
+        <div class="solution-card">
+          <span class="solution-icon">📱</span>
+          <div class="solution-title">Mobil ilova</div>
+          <div class="solution-desc">iOS va Android ilovasi orqali istalgan joydan bron qilish imkoniyati.</div>
+        </div>
+        <div class="solution-card">
+          <span class="solution-icon">📊</span>
+          <div class="solution-title">CEO Dashboard</div>
+          <div class="solution-desc">Restoran egasi barcha ma'lumotlarni real vaqtda ko'radi va boshqaradi.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 4: XUSUSIYATLAR ── -->
+  <div class="slide bg-accent-blue" id="slide-4">
+    <div class="slide-inner">
+      <div class="slide-header animate-1">
+        <div class="label" style="background:rgba(68,138,255,0.12);border-color:rgba(68,138,255,0.3);color:var(--blue)">🚀 Xususiyatlar</div>
+        <h2 class="slide-title">Asosiy imkoniyatlar</h2>
+        <div class="divider" style="background:linear-gradient(90deg,var(--blue),var(--purple))"></div>
+      </div>
+      <div class="grid-4 animate-2">
+        <div class="feat-card">
+          <span class="feat-icon">🗺️</span>
+          <div class="feat-title">Interaktiv xarita</div>
+          <div class="feat-desc">Leaflet + Google Maps. Reytingga qarab rangli markerlar. GPS joylashuv.</div>
+        </div>
+        <div class="feat-card">
+          <span class="feat-icon">🪑</span>
+          <div class="feat-title">Floor Plan</div>
+          <div class="feat-desc">Restoran zali rejasini interaktiv ko'rish. Har bir stolni alohida tanlash.</div>
+        </div>
+        <div class="feat-card">
+          <span class="feat-icon">🌐</span>
+          <div class="feat-title">Ko'p tilli</div>
+          <div class="feat-desc">UZ / RU / EN — uch tilda to'liq qo'llab-quvvatlash. Tilni o'zgartirish oson.</div>
+        </div>
+        <div class="feat-card">
+          <span class="feat-icon">🌙</span>
+          <div class="feat-title">Dark / Light mode</div>
+          <div class="feat-desc">Foydalanuvchi o'z istaganiga ko'ra mavzuni tanlaydi. Batareyani tejaydi.</div>
+        </div>
+        <div class="feat-card">
+          <span class="feat-icon">👑</span>
+          <div class="feat-title">CEO Panel</div>
+          <div class="feat-desc">Barcha restoranlarni boshqarish. Admin tayinlash. Foydalanuvchilar nazorati.</div>
+        </div>
+        <div class="feat-card">
+          <span class="feat-icon">🛡️</span>
+          <div class="feat-title">Trust Score</div>
+          <div class="feat-desc">Mijozlarning ishonchlilik bali. Yomon mijozlarni ban qilish imkoniyati.</div>
+        </div>
+        <div class="feat-card">
+          <span class="feat-icon">💳</span>
+          <div class="feat-title">Depozit tizimi</div>
+          <div class="feat-desc">Bron uchun oldindan to'lov. Bepul bekor qilish oynasi. UZS formati.</div>
+        </div>
+        <div class="feat-card">
+          <span class="feat-icon">📅</span>
+          <div class="feat-title">Bronlarim</div>
+          <div class="feat-desc">Mijoz barcha bronlarini bir joyda ko'radi, bekor qiladi yoki o'zgartiradi.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 5: QANDAY ISHLAYDI ── -->
+  <div class="slide bg-accent-teal" id="slide-5">
+    <div class="slide-inner">
+      <div class="slide-header animate-1">
+        <div class="label" style="background:rgba(29,233,182,0.1);border-color:rgba(29,233,182,0.3);color:var(--teal)">⚙️ Jarayon</div>
+        <h2 class="slide-title">Qanday ishlaydi?</h2>
+        <div class="divider" style="background:linear-gradient(90deg,var(--teal),var(--blue))"></div>
+        <p class="slide-sub">Mijoz uchun bronlash jarayoni — bor-yo'g'i <span class="hl-teal">4 qadam</span></p>
+      </div>
+      <div class="grid-4 animate-2">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-title">🔍 Restoran tanlang</div>
+          <div class="step-desc">Xaritada yoki ro'yxatda kerakli restoranni toping. Reyting, oshxona turi, ish vaqti ko'rinadi.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-title">🪑 Stol tanlang</div>
+          <div class="step-desc">Interaktiv zal rejasidan bo'sh stolni tanlang. Har bir stol sig'imi ko'rsatilgan.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-title">📅 Vaqt belgilang</div>
+          <div class="step-desc">Sana, boshlash vaqti va mehmonlar sonini kiriting. Tizim qulay vaqtlarni ko'rsatadi.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-title">✅ Tasdiqlang</div>
+          <div class="step-desc">Bronni tasdiqlang. SMS/bildirish yuboriladi. Bronlarim sahifasida ko'rasiz.</div>
+        </div>
+      </div>
+      <div class="animate-3" style="margin-top:28px">
+        <div class="glass-card" style="padding:20px 32px;display:inline-flex;align-items:center;gap:32px">
+          <div style="text-align:center">
+            <div style="font-size:1.8rem;font-weight:900;color:var(--teal)">60s</div>
+            <div style="font-size:0.72rem;color:var(--muted)">O'rtacha bron vaqti</div>
+          </div>
+          <div style="width:1px;height:40px;background:var(--glass-border)"></div>
+          <div style="text-align:center">
+            <div style="font-size:1.8rem;font-weight:900;color:var(--green)">0</div>
+            <div style="font-size:0.72rem;color:var(--muted)">Ikkilik bronlar</div>
+          </div>
+          <div style="width:1px;height:40px;background:var(--glass-border)"></div>
+          <div style="text-align:center">
+            <div style="font-size:1.8rem;font-weight:900;color:var(--blue)">3</div>
+            <div style="font-size:0.72rem;color:var(--muted)">Oddiy qadam</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 6: FOYDALANUVCHI ROLLARI ── -->
+  <div class="slide bg-accent-purple" id="slide-6">
+    <div class="slide-inner">
+      <div class="slide-header animate-1">
+        <div class="label" style="background:rgba(124,77,255,0.12);border-color:rgba(124,77,255,0.3);color:#b39ddb">👥 Rollar</div>
+        <h2 class="slide-title">Foydalanuvchi rollari</h2>
+        <div class="divider" style="background:linear-gradient(90deg,var(--purple),var(--blue))"></div>
+      </div>
+      <div class="grid-3 animate-2" style="max-width:900px;margin:0 auto">
+        <!-- CEO -->
+        <div class="glass-card" style="border-color:rgba(255,215,64,0.25);text-align:left">
+          <div style="font-size:2.5rem;margin-bottom:12px">👑</div>
+          <div style="font-size:1.1rem;font-weight:800;color:var(--yellow);margin-bottom:14px">CEO</div>
+          <ul class="role-list" style="list-style:none">
+            <li style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.79rem;color:var(--muted)"><span style="color:var(--green);font-weight:700">→</span> Barcha restoranlarni boshqarish</li>
+            <li style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.79rem;color:var(--muted)"><span style="color:var(--green);font-weight:700">→</span> Admin tayinlash va olib tashlash</li>
+            <li style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.79rem;color:var(--muted)"><span style="color:var(--green);font-weight:700">→</span> Foydalanuvchilarni ban qilish</li>
+            <li style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.79rem;color:var(--muted)"><span style="color:var(--green);font-weight:700">→</span> Trust Score o'zgartirish</li>
+            <li style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.79rem;color:var(--muted)"><span style="color:var(--green);font-weight:700">→</span> Depozit qoidalarini belgilash</li>
+            <li style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.79rem;color:var(--muted)"><span style="color:var(--green);font-weight:700">→</span> Barcha bronlarni ko'rish</li>
+          </ul>
+        </div>
+        <!-- Admin -->
+        <div class="glass-card" style="border-color:rgba(0,200,83,0.25);text-align:left">
+          <div style="font-size:2.5rem;margin-bottom:12px">🏪</div>
+          <div style="font-size:1.1rem;font-weight:800;color:var(--green);margin-bottom:14px">Admin</div>
+          <ul class="role-list" style="list-style:none">
+            <li style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.79rem;color:var(--muted)"><span style="color:var(--green);font-weight:700">→</span> O'z restoranini boshqarish</li>
+            <li style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.79rem;color:var(--muted)"><span style="color:var(--green);font-weight:700">→</span> Stollarni qo'shish/o'chirish</li>
+            <li style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.79rem;color:var(--muted)"><span style="color:var(--green);font-weight:700">→</span> Bronlarni tasdiqlash/rad etish</li>
+            <li style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.79rem;color:var(--muted)"><span style="color:var(--green);font-weight:700">→</span> Menyu boshqaruvi</li>
+            <li style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.79rem;color:var(--muted)"><span style="color:var(--green);font-weight:700">→</span> Zal rejasini tahrirlash</li>
+            <li style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.79rem;color:var(--muted)"><span style="color:var(--green);font-weight:700">→</span> Ish vaqtini belgilash</li>
+          </ul>
+        </div>
+        <!-- Customer -->
+        <div class="glass-card" style="border-color:rgba(68,138,255,0.25);text-align:left">
+          <div style="font-size:2.5rem;margin-bottom:12px">🧑</div>
+          <div style="font-size:1.1rem;font-weight:800;color:var(--blue);margin-bottom:14px">Mijoz</div>
+          <ul class="role-list" style="list-style:none">
+            <li style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.79rem;color:var(--muted)"><span style="color:var(--green);font-weight:700">→</span> Restoranlarni xaritada topish</li>
+            <li style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.79rem;color:var(--muted)"><span style="color:var(--green);font-weight:700">→</span> Stol bronlash va bekor qilish</li>
+            <li style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.79rem;color:var(--muted)"><span style="color:var(--green);font-weight:700">→</span> Barcha bronlarini ko'rish</li>
+            <li style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.79rem;color:var(--muted)"><span style="color:var(--green);font-weight:700">→</span> Profil tahrirlash</li>
+            <li style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.79rem;color:var(--muted)"><span style="color:var(--green);font-weight:700">→</span> Til va mavzu tanlash</li>
+            <li style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.79rem;color:var(--muted)"><span style="color:var(--green);font-weight:700">→</span> Menyu va narxlarni ko'rish</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 7: TEXNOLOGIYALAR ── -->
+  <div class="slide bg-accent-blue" id="slide-7">
+    <div class="slide-inner">
+      <div class="slide-header animate-1">
+        <div class="label" style="background:rgba(68,138,255,0.12);border-color:rgba(68,138,255,0.3);color:var(--blue)">⚙️ Texnologiyalar</div>
+        <h2 class="slide-title">Tech Stack</h2>
+        <div class="divider" style="background:linear-gradient(90deg,var(--blue),var(--purple))"></div>
+      </div>
+
+      <div class="animate-2" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:900px;margin:0 auto">
+        <!-- Frontend -->
+        <div class="glass-card" style="text-align:left">
+          <div style="font-size:0.7rem;font-weight:700;letter-spacing:3px;color:var(--blue);margin-bottom:16px;text-transform:uppercase">🖥️ Frontend</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <span class="tech-badge">⚛️ React 18</span>
+            <span class="tech-badge">⚡ Vite</span>
+            <span class="tech-badge">🎨 Tailwind CSS</span>
+            <span class="tech-badge">🗺️ Leaflet.js</span>
+            <span class="tech-badge">🔀 React Router v7</span>
+            <span class="tech-badge">🌐 i18n</span>
+            <span class="tech-badge">🔔 React Hot Toast</span>
+            <span class="tech-badge">📐 TypeScript</span>
+          </div>
+        </div>
+        <!-- Backend -->
+        <div class="glass-card" style="text-align:left">
+          <div style="font-size:0.7rem;font-weight:700;letter-spacing:3px;color:var(--green);margin-bottom:16px;text-transform:uppercase">🔧 Backend</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <span class="tech-badge">🟩 Node.js</span>
+            <span class="tech-badge">🚂 Express.js</span>
+            <span class="tech-badge">🔷 Prisma ORM</span>
+            <span class="tech-badge">🐘 PostgreSQL</span>
+            <span class="tech-badge">🔐 JWT Auth</span>
+            <span class="tech-badge">🌱 Bcrypt</span>
+          </div>
+        </div>
+        <!-- Mobile -->
+        <div class="glass-card" style="text-align:left">
+          <div style="font-size:0.7rem;font-weight:700;letter-spacing:3px;color:var(--teal);margin-bottom:16px;text-transform:uppercase">📱 Mobile</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <span class="tech-badge">📱 React Native</span>
+            <span class="tech-badge">🔷 Expo</span>
+            <span class="tech-badge">📦 iOS & Android</span>
+          </div>
+        </div>
+        <!-- Deploy -->
+        <div class="glass-card" style="text-align:left">
+          <div style="font-size:0.7rem;font-weight:700;letter-spacing:3px;color:var(--yellow);margin-bottom:16px;text-transform:uppercase">☁️ Deploy</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <span class="tech-badge">▲ Vercel</span>
+            <span class="tech-badge">🔷 Render.com</span>
+            <span class="tech-badge">🌐 REST API</span>
+            <span class="tech-badge">🔒 HTTPS/SSL</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 8: ARXITEKTURA ── -->
+  <div class="slide bg-accent-purple" id="slide-8">
+    <div class="slide-inner">
+      <div class="slide-header animate-1">
+        <div class="label" style="background:rgba(124,77,255,0.12);border-color:rgba(124,77,255,0.3);color:#b39ddb">🏗️ Arxitektura</div>
+        <h2 class="slide-title">Tizim arxitekturasi</h2>
+        <div class="divider" style="background:linear-gradient(90deg,var(--purple),var(--blue))"></div>
+      </div>
+
+      <div class="animate-2" style="max-width:900px;margin:0 auto">
+        <!-- Row 1: Clients -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
+          <div class="arch-box" style="background:rgba(68,138,255,0.1);border:1px solid rgba(68,138,255,0.3)">
+            🖥️<br/><span style="font-size:0.72rem">Web Браузер<br/><span style="color:var(--blue)">React + Vite</span></span>
+          </div>
+          <div class="arch-box" style="background:rgba(29,233,182,0.08);border:1px solid rgba(29,233,182,0.25)">
+            📱<br/><span style="font-size:0.72rem">Mobile App<br/><span style="color:var(--teal)">React Native</span></span>
+          </div>
+          <div class="arch-box" style="background:rgba(124,77,255,0.08);border:1px solid rgba(124,77,255,0.25)">
+            👑<br/><span style="font-size:0.72rem">CEO Panel<br/><span style="color:#b39ddb">Dashboard</span></span>
+          </div>
+        </div>
+
+        <!-- Arrow down -->
+        <div style="text-align:center;font-size:1.4rem;color:var(--muted);margin-bottom:12px">↓ REST API ↓</div>
+
+        <!-- Row 2: Backend -->
+        <div style="display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:16px">
+          <div class="arch-box" style="background:rgba(0,200,83,0.08);border:1px solid rgba(0,200,83,0.25);padding:20px">
+            <div style="font-size:0.72rem;font-weight:700;color:var(--green);margin-bottom:8px">🔧 Backend Server</div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+              <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;font-size:0.68rem">🔐 Auth<br/>JWT + Bcrypt</div>
+              <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;font-size:0.68rem">📅 Booking<br/>API</div>
+              <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;font-size:0.68rem">🏪 Restaurant<br/>API</div>
+              <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;font-size:0.68rem">👑 CEO<br/>API</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Arrow down -->
+        <div style="text-align:center;font-size:1.4rem;color:var(--muted);margin-bottom:12px">↓ Prisma ORM ↓</div>
+
+        <!-- Row 3: DB -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="arch-box" style="background:rgba(255,109,0,0.08);border:1px solid rgba(255,109,0,0.25);padding:20px">
+            🐘 <span style="font-size:0.78rem;color:#ffcc80">PostgreSQL — Asosiy ma'lumotlar bazasi</span>
+          </div>
+          <div class="arch-box" style="background:rgba(255,215,64,0.08);border:1px solid rgba(255,215,64,0.25);padding:20px">
+            🗺️ <span style="font-size:0.78rem;color:var(--yellow)">Google Maps API — Xarita integratsiya</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 9: CEO DASHBOARD ── -->
+  <div class="slide bg-accent-orange" id="slide-9">
+    <div class="slide-inner">
+      <div class="slide-header animate-1">
+        <div class="label" style="background:rgba(255,215,64,0.1);border-color:rgba(255,215,64,0.3);color:var(--yellow)">👑 CEO Panel</div>
+        <h2 class="slide-title">CEO Dashboard imkoniyatlari</h2>
+        <div class="divider" style="background:linear-gradient(90deg,var(--yellow),var(--orange))"></div>
+        <p class="slide-sub">Restoran tarmog'ini <span class="hl-yellow">to'liq nazorat</span> qilish — bir ekranda</p>
+      </div>
+      <div class="grid-3 animate-2">
+        <div class="glass-card" style="border-color:rgba(255,215,64,0.2);text-align:left">
+          <div style="font-size:1.8rem;margin-bottom:10px">🏪</div>
+          <div style="font-size:0.92rem;font-weight:700;color:var(--yellow);margin-bottom:8px">Restoran boshqaruvi</div>
+          <div style="font-size:0.77rem;color:var(--muted);line-height:1.6">
+            Yangi restoran qo'shish, tahrirlash, o'chirish. Ko'p tilli nom va tavsif (UZ/RU/EN). Ish vaqti, reyting, manzil, koordinatalar.
+          </div>
+        </div>
+        <div class="glass-card" style="border-color:rgba(255,215,64,0.2);text-align:left">
+          <div style="font-size:1.8rem;margin-bottom:10px">👨‍💼</div>
+          <div style="font-size:0.92rem;font-weight:700;color:var(--yellow);margin-bottom:8px">Admin tayinlash</div>
+          <div style="font-size:0.77rem;color:var(--muted);line-height:1.6">
+            Har bir restoranga alohida admin tayinlash. Admin olib tashlash. Foydalanuvchi ro'lini o'zgartirish.
+          </div>
+        </div>
+        <div class="glass-card" style="border-color:rgba(255,215,64,0.2);text-align:left">
+          <div style="font-size:1.8rem;margin-bottom:10px">💳</div>
+          <div style="font-size:0.92rem;font-weight:700;color:var(--yellow);margin-bottom:8px">Depozit qoidalari</div>
+          <div style="font-size:0.77rem;color:var(--muted);line-height:1.6">
+            Har bir restoran uchun alohida depozit miqdori belgilash. Bepul bekor qilish oynasi (soat). UZS formati.
+          </div>
+        </div>
+        <div class="glass-card" style="border-color:rgba(255,215,64,0.2);text-align:left">
+          <div style="font-size:1.8rem;margin-bottom:10px">📅</div>
+          <div style="font-size:0.92rem;font-weight:700;color:var(--yellow);margin-bottom:8px">Barcha bronlar</div>
+          <div style="font-size:0.77rem;color:var(--muted);line-height:1.6">
+            Barcha restoranlar bo'yicha bronlarni ko'rish. Holat (kutilmoqda, tasdiqlangan, bekor). Mijoz ma'lumotlari.
+          </div>
+        </div>
+        <div class="glass-card" style="border-color:rgba(255,215,64,0.2);text-align:left">
+          <div style="font-size:1.8rem;margin-bottom:10px">👥</div>
+          <div style="font-size:0.92rem;font-weight:700;color:var(--yellow);margin-bottom:8px">Foydalanuvchilar</div>
+          <div style="font-size:0.77rem;color:var(--muted);line-height:1.6">
+            Barcha foydalanuvchilarni ro'yxatini ko'rish. Ban/Unban. Trust Score o'zgartirish. Rol belgilash.
+          </div>
+        </div>
+        <div class="glass-card" style="border-color:rgba(255,215,64,0.2);text-align:left">
+          <div style="font-size:1.8rem;margin-bottom:10px">📊</div>
+          <div style="font-size:0.92rem;font-weight:700;color:var(--yellow);margin-bottom:8px">Statistika</div>
+          <div style="font-size:0.77rem;color:var(--muted);line-height:1.6">
+            Restoranlar soni, foydalanuvchilar soni, umumiy bronlar. Real vaqtda yangilanib turadi.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 10: TAQQOSLASH ── -->
+  <div class="slide" id="slide-10" style="background:radial-gradient(ellipse at 50% 50%,rgba(0,230,118,0.06) 0%,transparent 70%)">
+    <div class="slide-inner">
+      <div class="slide-header animate-1">
+        <div class="label">📊 Taqqoslash</div>
+        <h2 class="slide-title">TableBook vs Raqobatchilar</h2>
+        <div class="divider"></div>
+        <p class="slide-sub">Global alternativlar bilan solishtirganda <span class="hl">TableBook</span> O'zbekiston bozorini yanada yaxshi qoplaydi</p>
+      </div>
+      <div class="animate-2 table-wrapper">
+        <table class="comp-table">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding-left:20px">Xususiyat</th>
+              <th class="our-col" style="color:var(--green)">🍽️ TableBook</th>
+              <th>OpenTable</th>
+              <th>Resy</th>
+              <th>Yelp Reserve</th>
+              <th>Fork</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding-left:20px">🇺🇿 O'zbek tili</td>
+              <td class="our-col"><span class="check">✅</span></td>
+              <td><span class="cross">✗</span></td>
+              <td><span class="cross">✗</span></td>
+              <td><span class="cross">✗</span></td>
+              <td><span class="cross">✗</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left:20px">💵 UZS to'lov formati</td>
+              <td class="our-col"><span class="check">✅</span></td>
+              <td><span class="cross">✗</span></td>
+              <td><span class="cross">✗</span></td>
+              <td><span class="cross">✗</span></td>
+              <td><span class="cross">✗</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left:20px">🗺️ Interaktiv xarita</td>
+              <td class="our-col"><span class="check">✅</span></td>
+              <td><span class="check">✅</span></td>
+              <td><span class="partial">⚡</span></td>
+              <td><span class="check">✅</span></td>
+              <td><span class="partial">⚡</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left:20px">🪑 Floor Plan (Zal rejasi)</td>
+              <td class="our-col"><span class="check">✅</span></td>
+              <td><span class="partial">⚡</span></td>
+              <td><span class="check">✅</span></td>
+              <td><span class="cross">✗</span></td>
+              <td><span class="partial">⚡</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left:20px">📱 Mobil ilova</td>
+              <td class="our-col"><span class="check">✅</span></td>
+              <td><span class="check">✅</span></td>
+              <td><span class="check">✅</span></td>
+              <td><span class="check">✅</span></td>
+              <td><span class="check">✅</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left:20px">🛡️ Trust Score tizimi</td>
+              <td class="our-col"><span class="check">✅</span></td>
+              <td><span class="cross">✗</span></td>
+              <td><span class="cross">✗</span></td>
+              <td><span class="cross">✗</span></td>
+              <td><span class="cross">✗</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left:20px">🌐 Ko'p tilli qo'llab-quvvatlash</td>
+              <td class="our-col"><span class="check">✅ UZ/RU/EN</span></td>
+              <td><span class="partial">⚡ Cheklangan</span></td>
+              <td><span class="cross">✗</span></td>
+              <td><span class="partial">⚡</span></td>
+              <td><span class="check">✅</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left:20px">👑 CEO Super Panel</td>
+              <td class="our-col"><span class="check">✅</span></td>
+              <td><span class="partial">⚡</span></td>
+              <td><span class="partial">⚡</span></td>
+              <td><span class="cross">✗</span></td>
+              <td><span class="partial">⚡</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left:20px">🆓 Restoran uchun bepul</td>
+              <td class="our-col"><span class="check">✅</span></td>
+              <td><span class="cross">✗ To'lovli</span></td>
+              <td><span class="cross">✗ To'lovli</span></td>
+              <td><span class="cross">✗</span></td>
+              <td><span class="cross">✗</span></td>
+            </tr>
+            <tr>
+              <td style="padding-left:20px">🇺🇿 O'zbekiston serverlari</td>
+              <td class="our-col"><span class="check">✅</span></td>
+              <td><span class="cross">✗ AQSh</span></td>
+              <td><span class="cross">✗ AQSh</span></td>
+              <td><span class="cross">✗ AQSh</span></td>
+              <td><span class="cross">✗ Yevropa</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="animate-3" style="margin-top:16px;font-size:0.72rem;color:var(--muted);text-align:right">
+        ✅ = To'liq qo'llab-quvvatlash &nbsp;|&nbsp; ⚡ = Qisman &nbsp;|&nbsp; ✗ = Yo'q
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 11: BOZOR ── -->
+  <div class="slide bg-accent-green" id="slide-11">
+    <div class="slide-inner">
+      <div class="slide-header animate-1">
+        <div class="label">📈 Bozor</div>
+        <h2 class="slide-title">O'zbekiston bozori imkoniyati</h2>
+        <div class="divider"></div>
+      </div>
+      <div class="animate-2" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:900px;margin:0 auto 24px">
+        <div class="market-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:0.82rem;font-weight:600;color:var(--muted)">O'zbekistondagi restoranlar</span>
+            <span style="font-size:1.4rem;font-weight:900;color:var(--green)">12,000+</span>
+          </div>
+          <div class="market-bar"><div class="market-bar-fill" style="--w:85%"></div></div>
+          <div style="font-size:0.7rem;color:var(--muted);margin-top:6px">Yirik shaharlar: Toshkent, Samarqand, Buxoro</div>
+        </div>
+        <div class="market-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:0.82rem;font-weight:600;color:var(--muted)">Smartfon foydalanuvchilari</span>
+            <span style="font-size:1.4rem;font-weight:900;color:var(--teal)">22M+</span>
+          </div>
+          <div class="market-bar"><div class="market-bar-fill" style="--w:72%;background:linear-gradient(90deg,var(--teal),var(--blue))"></div></div>
+          <div style="font-size:0.7rem;color:var(--muted);margin-top:6px">Internet foydalanuvchilari yiliga 15% o'smoqda</div>
+        </div>
+        <div class="market-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:0.82rem;font-weight:600;color:var(--muted)">Online bron qiluvchilar ulushi</span>
+            <span style="font-size:1.4rem;font-weight:900;color:var(--yellow)">8%</span>
+          </div>
+          <div class="market-bar"><div class="market-bar-fill" style="--w:8%;background:linear-gradient(90deg,var(--yellow),var(--orange))"></div></div>
+          <div style="font-size:0.7rem;color:var(--muted);margin-top:6px">Potensial — katta o'sish imkoniyati!</div>
+        </div>
+        <div class="market-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:0.82rem;font-weight:600;color:var(--muted)">Maqsadli bozor hajmi (SAM)</span>
+            <span style="font-size:1.4rem;font-weight:900;color:var(--purple)">$4.5M</span>
+          </div>
+          <div class="market-bar"><div class="market-bar-fill" style="--w:60%;background:linear-gradient(90deg,var(--purple),var(--blue))"></div></div>
+          <div style="font-size:0.7rem;color:var(--muted);margin-top:6px">Yillik o'sish sur'ati: taxminan 35%</div>
+        </div>
+      </div>
+      <div class="animate-3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:700px;margin:0 auto">
+        <div class="stat-card">
+          <div class="stat-num">36M+</div>
+          <div class="stat-label">O'zbekiston aholisi</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">68%</div>
+          <div class="stat-label">30 yoshgacha bo'lganlar</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">↑45%</div>
+          <div class="stat-label">Restoran sohasining o'sishi (2024)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 12: BIZNES MODEL ── -->
+  <div class="slide bg-accent-blue" id="slide-12">
+    <div class="slide-inner">
+      <div class="slide-header animate-1">
+        <div class="label" style="background:rgba(68,138,255,0.12);border-color:rgba(68,138,255,0.3);color:var(--blue)">💼 Biznes</div>
+        <h2 class="slide-title">Biznes model va daromad</h2>
+        <div class="divider" style="background:linear-gradient(90deg,var(--blue),var(--purple))"></div>
+      </div>
+      <div class="grid-3 animate-2">
+        <div class="glass-card" style="border-color:rgba(0,230,118,0.2);text-align:left;position:relative;overflow:hidden">
+          <div style="position:absolute;top:14px;right:14px;background:rgba(0,230,118,0.15);border:1px solid rgba(0,230,118,0.3);border-radius:8px;padding:3px 10px;font-size:0.65rem;font-weight:700;color:var(--green)">HOZIR BEPUL</div>
+          <div style="font-size:2rem;margin-bottom:10px">🆓</div>
+          <div style="font-size:1rem;font-weight:800;color:var(--green);margin-bottom:10px">Freemium</div>
+          <div style="font-size:0.78rem;color:var(--muted);line-height:1.6">
+            Restoranlar platformaga bepul ulanadilar. Asosiy funksiyalar tekin. Keng tarqalishni ta'minlaydi.
+          </div>
+        </div>
+        <div class="glass-card" style="border-color:rgba(68,138,255,0.2);text-align:left">
+          <div style="font-size:2rem;margin-bottom:10px">💎</div>
+          <div style="font-size:1rem;font-weight:800;color:var(--blue);margin-bottom:10px">Premium Obuna</div>
+          <div style="font-size:0.78rem;color:var(--muted);line-height:1.6">
+            Tahlil, marketing vositalari, ustuvor qo'llab-quvvatlash. Oylik yoki yillik obuna. Restoran uchun qo'shimcha imkoniyatlar.
+          </div>
+        </div>
+        <div class="glass-card" style="border-color:rgba(124,77,255,0.2);text-align:left">
+          <div style="font-size:2rem;margin-bottom:10px">💳</div>
+          <div style="font-size:1rem;font-weight:800;color:#b39ddb;margin-bottom:10px">Depozit komissiyasi</div>
+          <div style="font-size:0.78rem;color:var(--muted);line-height:1.6">
+            Har bir to'lovli brondan kichik foiz. Platformaning asosiy daromad manbai. Avtomatik hisoblash.
+          </div>
+        </div>
+        <div class="glass-card" style="border-color:rgba(255,215,64,0.2);text-align:left">
+          <div style="font-size:2rem;margin-bottom:10px">📣</div>
+          <div style="font-size:1rem;font-weight:800;color:var(--yellow);margin-bottom:10px">Reklama</div>
+          <div style="font-size:0.78rem;color:var(--muted);line-height:1.6">
+            Xaritada featured (tavsiya etilgan) restoran. Qidiruv natijalarida birinchi o'rin. Kampaniya boshqaruvi.
+          </div>
+        </div>
+        <div class="glass-card" style="border-color:rgba(29,233,182,0.2);text-align:left">
+          <div style="font-size:2rem;margin-bottom:10px">🤝</div>
+          <div style="font-size:1rem;font-weight:800;color:var(--teal);margin-bottom:10px">B2B Hamkorlik</div>
+          <div style="font-size:0.78rem;color:var(--muted);line-height:1.6">
+            Korporativ mijozlar uchun maxsus tariflar. Event va tadbirlar uchun tizim. White-label yechim.
+          </div>
+        </div>
+        <div class="glass-card" style="border-color:rgba(255,109,0,0.2);text-align:left">
+          <div style="font-size:2rem;margin-bottom:10px">📊</div>
+          <div style="font-size:1rem;font-weight:800;color:#ffcc80;margin-bottom:10px">Ma'lumotlar analitikasi</div>
+          <div style="font-size:0.78rem;color:var(--muted);line-height:1.6">
+            Restoran uchun maxsus tahlil hisobotlari. Band vaqtlar, mashhur stollar, mijoz profili.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 13: ROADMAP ── -->
+  <div class="slide bg-accent-teal" id="slide-13">
+    <div class="slide-inner">
+      <div class="slide-header animate-1">
+        <div class="label" style="background:rgba(29,233,182,0.1);border-color:rgba(29,233,182,0.3);color:var(--teal)">🗺️ Yo'l xaritasi</div>
+        <h2 class="slide-title">Kelajak rejalari — Roadmap</h2>
+        <div class="divider" style="background:linear-gradient(90deg,var(--teal),var(--blue))"></div>
+      </div>
+      <div class="animate-2" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:1000px;margin:0 auto">
+        <!-- Q1 -->
+        <div class="glass-card" style="text-align:left;border-color:rgba(0,230,118,0.3);position:relative">
+          <div style="background:var(--green);color:#000;font-size:0.65rem;font-weight:800;padding:4px 10px;border-radius:8px;display:inline-block;margin-bottom:12px;letter-spacing:1px">✅ HOZIR</div>
+          <div style="font-size:0.92rem;font-weight:800;color:#fff;margin-bottom:12px">Boshlang'ich versiya</div>
+          <ul style="list-style:none">
+            <li style="font-size:0.73rem;color:var(--muted);padding:3px 0;display:flex;gap:6px"><span style="color:var(--green)">✓</span>Web ilova</li>
+            <li style="font-size:0.73rem;color:var(--muted);padding:3px 0;display:flex;gap:6px"><span style="color:var(--green)">✓</span>React Native mobil</li>
+            <li style="font-size:0.73rem;color:var(--muted);padding:3px 0;display:flex;gap:6px"><span style="color:var(--green)">✓</span>CEO Dashboard</li>
+            <li style="font-size:0.73rem;color:var(--muted);padding:3px 0;display:flex;gap:6px"><span style="color:var(--green)">✓</span>Ko'p tilli qo'llab-quvvatlash</li>
+            <li style="font-size:0.73rem;color:var(--muted);padding:3px 0;display:flex;gap:6px"><span style="color:var(--green)">✓</span>Floor Plan</li>
+          </ul>
+        </div>
+        <!-- Q2 -->
+        <div class="glass-card" style="text-align:left;border-color:rgba(29,233,182,0.2)">
+          <div style="background:rgba(29,233,182,0.15);border:1px solid rgba(29,233,182,0.3);color:var(--teal);font-size:0.65rem;font-weight:800;padding:4px 10px;border-radius:8px;display:inline-block;margin-bottom:12px;letter-spacing:1px">🔄 Q3 2025</div>
+          <div style="font-size:0.92rem;font-weight:800;color:#fff;margin-bottom:12px">To'lov tizimi</div>
+          <ul style="list-style:none">
+            <li style="font-size:0.73rem;color:var(--muted);padding:3px 0;display:flex;gap:6px"><span style="color:var(--teal)">→</span>Click.uz integratsiyasi</li>
+            <li style="font-size:0.73rem;color:var(--muted);padding:3px 0;display:flex;gap:6px"><span style="color:var(--teal)">→</span>Payme integratsiyasi</li>
+            <li style="font-size:0.73rem;color:var(--muted);padding:3px 0;display:flex;gap:6px"><span style="color:var(--teal)">→</span>Push bildirish</li>
+            <li style="font-size:0.73rem;color:var(--muted);padding:3px 0;display:flex;gap:6px"><span style="color:var(--teal)">→</span>SMS tasdiqnoma</li>
+          </ul>
+        </div>
+        <!-- Q3 -->
+        <div class="glass-card" style="text-align:left;border-color:rgba(68,138,255,0.2)">
+          <div style="background:rgba(68,138,255,0.15);border:1px solid rgba(68,138,255,0.3);color:var(--blue);font-size:0.65rem;font-weight:800;padding:4px 10px;border-radius:8px;display:inline-block;margin-bottom:12px;letter-spacing:1px">📌 Q4 2025</div>
+          <div style="font-size:0.92rem;font-weight:800;color:#fff;margin-bottom:12px">AI & Analitika</div>
+          <ul style="list-style:none">
+            <li style="font-size:0.73rem;color:var(--muted);padding:3px 0;display:flex;gap:6px"><span style="color:var(--blue)">→</span>AI tavsiya tizimi</li>
+            <li style="font-size:0.73rem;color:var(--muted);padding:3px 0;display:flex;gap:6px"><span style="color:var(--blue)">→</span>Tahlil dashboard</li>
+            <li style="font-size:0.73rem;color:var(--muted);padding:3px 0;display:flex;gap:6px"><span style="color:var(--blue)">→</span>Chatbot yordamchi</li>
+            <li style="font-size:0.73rem;color:var(--muted);padding:3px 0;display:flex;gap:6px"><span style="color:var(--blue)">→</span>Mijoz sharhlari</li>
+          </ul>
+        </div>
+        <!-- Q4 -->
+        <div class="glass-card" style="text-align:left;border-color:rgba(124,77,255,0.2)">
+          <div style="background:rgba(124,77,255,0.15);border:1px solid rgba(124,77,255,0.3);color:#b39ddb;font-size:0.65rem;font-weight:800;padding:4px 10px;border-radius:8px;display:inline-block;margin-bottom:12px;letter-spacing:1px">🚀 2026</div>
+          <div style="font-size:0.92rem;font-weight:800;color:#fff;margin-bottom:12px">Kengayish</div>
+          <ul style="list-style:none">
+            <li style="font-size:0.73rem;color:var(--muted);padding:3px 0;display:flex;gap:6px"><span style="color:#b39ddb">→</span>Qozog'iston bozori</span></li>
+            <li style="font-size:0.73rem;color:var(--muted);padding:3px 0;display:flex;gap:6px"><span style="color:#b39ddb">→</span>Delivery integratsiyasi</li>
+            <li style="font-size:0.73rem;color:var(--muted);padding:3px 0;display:flex;gap:6px"><span style="color:#b39ddb">→</span>QR menu tizimi</li>
+            <li style="font-size:0.73rem;color:var(--muted);padding:3px 0;display:flex;gap:6px"><span style="color:#b39ddb">→</span>Loyallik dasturi</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 14: XULOSA / CTA ── -->
+  <div class="slide bg-accent-green" id="slide-14">
+    <div class="slide-inner" style="position:relative">
+
+      <div class="float-tag" style="top:5%;left:2%;animation-delay:0s">
+        🏆 <span>Hackathon Loyihasi</span>
+      </div>
+      <div class="float-tag" style="top:5%;right:2%;animation-delay:1.2s">
+        🇺🇿 <span>Made in Uzbekistan</span>
+      </div>
+
+      <div class="animate-1">
+        <div style="font-size:4rem;margin-bottom:16px">🍽️</div>
+        <h2 class="slide-title" style="font-size:clamp(2rem,5vw,3.5rem)">
+          TableBook bilan<br/>kelajakni birga quring!
+        </h2>
+      </div>
+
+      <div class="animate-2">
+        <p class="slide-sub" style="max-width:600px">
+          O'zbekistondagi restoranlar uchun yaratilgan <span class="hl">birinchi</span> to'liq funksional online stol bronlash platformasi.
+          Mahalliy til, mahalliy to'lov, mahalliy bozor.
+        </p>
+      </div>
+
+      <div class="animate-3" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;max-width:800px;margin:0 auto 32px">
+        <div class="stat-card">
+          <div class="stat-num" style="font-size:2rem">3</div>
+          <div class="stat-label">Til</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" style="font-size:2rem">3</div>
+          <div class="stat-label">Foydalanuvchi roli</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" style="font-size:2rem">2</div>
+          <div class="stat-label">Platforma (Web+Mobil)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" style="font-size:2rem">∞</div>
+          <div class="stat-label">Imkoniyatlar</div>
+        </div>
+      </div>
+
+      <div class="animate-4" style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+        <div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;padding:14px 28px;text-align:center">
+          <div style="font-size:0.68rem;color:var(--muted);margin-bottom:4px;letter-spacing:2px;text-transform:uppercase">GitHub</div>
+          <div style="font-size:0.9rem;font-weight:700">Navruzov07/TableBook</div>
+        </div>
+        <div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;padding:14px 28px;text-align:center">
+          <div style="font-size:0.68rem;color:var(--muted);margin-bottom:4px;letter-spacing:2px;text-transform:uppercase">Stack</div>
+          <div style="font-size:0.9rem;font-weight:700">React · Node.js · PostgreSQL</div>
+        </div>
+        <div style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.3);border-radius:16px;padding:14px 28px;text-align:center">
+          <div style="font-size:0.68rem;color:var(--green);margin-bottom:4px;letter-spacing:2px;text-transform:uppercase">Status</div>
+          <div style="font-size:0.9rem;font-weight:700;color:var(--green);display:flex;align-items:center;gap:6px;justify-content:center">
+            <span class="pulse"></span> Jonli ishlaydi
+          </div>
+        </div>
+      </div>
+
+      <div class="animate-5" style="margin-top:36px;font-size:0.9rem;color:var(--muted)">
+        E'tiboringiz uchun rahmat! 🙏<br/>
+        <span style="font-size:0.75rem;opacity:0.6">Savollar bormi? Biz tayormiz!</span>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /slides-wrapper -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════ -->
 <script>
-let cur=0,total=9,busy=false;
-const slides=document.querySelectorAll('.slide');
-const counter=document.getElementById('counter');
+// ── PARTICLES ──────────────────────────────────────────────
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
 
-function show(idx){
-  if(busy)return;busy=true;
-  slides[cur].classList.remove('active');
-  slides[cur].classList.add('exit');
-  setTimeout(()=>{slides[cur].classList.remove('exit');},500);
-  cur=idx;
-  slides[cur].classList.add('active');
-  counter.textContent=(cur+1)+' / '+total;
-  triggerAnimations(cur);
-  setTimeout(()=>{busy=false;},520);
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
 }
-function changeSlide(dir){
-  let n=cur+dir;
-  if(n<0)n=total-1;
-  if(n>=total)n=0;
-  show(n);
+resize();
+window.addEventListener('resize', () => { resize(); initParticles(); });
+
+function initParticles() {
+  particles = [];
+  const count = Math.floor(W * H / 14000);
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.5 + 0.3,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      alpha: Math.random() * 0.5 + 0.1
+    });
+  }
+}
+initParticles();
+
+function drawParticles() {
+  ctx.clearRect(0, 0, W, H);
+  const colors = ['#00e676', '#1de9b6', '#448aff', '#7c4dff'];
+  particles.forEach((p, i) => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+    if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = colors[i % colors.length];
+    ctx.globalAlpha = p.alpha;
+    ctx.fill();
+  });
+  // Draw connection lines
+  ctx.globalAlpha = 0.04;
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 100) {
+        ctx.beginPath();
+        ctx.strokeStyle = '#00e676';
+        ctx.lineWidth = 0.5;
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+// ── SLIDES LOGIC ────────────────────────────────────────────
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let current = 0;
+
+const progressBar = document.getElementById('progress-bar');
+const slideCounter = document.getElementById('slide-counter');
+const navDots = document.getElementById('nav-dots');
+
+// Create dots
+for (let i = 0; i < total; i++) {
+  const dot = document.createElement('div');
+  dot.className = 'dot' + (i === 0 ? ' active' : '');
+  dot.title = `Slayd ${i + 1}`;
+  dot.addEventListener('click', () => goTo(i));
+  navDots.appendChild(dot);
 }
 
-// Count-up animation
-function countUp(el){
-  const target=parseInt(el.dataset.count||'0');
-  let v=0;const step=Math.ceil(target/30);
-  const iv=setInterval(()=>{v=Math.min(v+step,target);el.textContent=v;if(v>=target)clearInterval(iv);},40);
-}
-function triggerAnimations(idx){
-  // Count up slide 7
-  if(idx===6){
-    const el=document.querySelector('#s7 [data-count]');
-    if(el)countUp(el);
+function updateUI() {
+  const pct = ((current + 1) / total * 100).toFixed(1);
+  progressBar.style.width = pct + '%';
+  slideCounter.textContent = String(current + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+
+  // Animate market bars on slide 11
+  if (current === 10) {
+    document.querySelectorAll('.market-bar-fill').forEach(el => {
+      el.style.width = '0';
+      setTimeout(() => { el.style.transition = 'width 1.2s ease'; el.style.width = el.style.getPropertyValue('--w') || getComputedStyle(el).getPropertyValue('--w'); }, 100);
+    });
   }
 }
 
+function goTo(idx) {
+  if (idx < 0 || idx >= total || idx === current) return;
+  slides[current].classList.remove('active');
+  slides[current].classList.add('exit');
+  setTimeout(() => slides[current - (current - idx > 0 ? 1 : -1) >= 0 ? current : current].classList.remove('exit'), 600);
+
+  // Actually handle exit correctly
+  const prev = current;
+  current = idx;
+  slides[prev].classList.remove('active');
+  slides[prev].classList.add('exit');
+  setTimeout(() => slides[prev].classList.remove('exit'), 700);
+
+  slides[current].classList.add('active');
+  updateUI();
+}
+
+// Init first slide
+slides[0].classList.add('active');
+updateUI();
+
+// Buttons
+document.getElementById('prev-btn').addEventListener('click', () => goTo(current - 1));
+document.getElementById('next-btn').addEventListener('click', () => goTo(current + 1));
+
 // Keyboard
-document.addEventListener('keydown',e=>{
-  if(e.key==='ArrowRight'||e.key==='ArrowDown')changeSlide(1);
-  if(e.key==='ArrowLeft'||e.key==='ArrowUp')changeSlide(-1);
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goTo(current + 1); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(current - 1); }
+  if (e.key === 'Home') goTo(0);
+  if (e.key === 'End') goTo(total - 1);
 });
 
-// Init
-slides[0].classList.add('active');
-counter.textContent='1 / '+total;
+// Touch swipe
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 50) dx < 0 ? goTo(current + 1) : goTo(current - 1);
+}, { passive: true });
+
+// Auto-hide key hint after 5s
+setTimeout(() => {
+  const hint = document.getElementById('key-hint');
+  if (hint) { hint.style.transition = 'opacity 1s'; hint.style.opacity = '0'; }
+}, 5000);
+
+// Counter animation helper
+function animateNumber(el, target, suffix = '') {
+  let start = 0;
+  const step = target / 40;
+  const timer = setInterval(() => {
+    start += step;
+    if (start >= target) { start = target; clearInterval(timer); }
+    el.textContent = Math.floor(start).toLocaleString() + suffix;
+  }, 30);
+}
 </script>
+
 </body>
 </html>
