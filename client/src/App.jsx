@@ -5,6 +5,7 @@ import { AuthProvider } from './context/AuthContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import { LangProvider } from './context/LangContext.jsx';
 import Navbar from './components/Layout/Navbar.jsx';
+import AIAssistant from './components/AIAssistant/AIAssistant.jsx';
 import HomePage from './pages/HomePage.jsx';
 import RestaurantPage from './pages/RestaurantPage.jsx';
 import MyBookingsPage from './pages/MyBookingsPage.jsx';
@@ -67,6 +68,7 @@ export default function App() {
                 }
               }}
             />
+            <AIAssistant />
           </BrowserRouter>
         </AuthProvider>
       </LangProvider>
